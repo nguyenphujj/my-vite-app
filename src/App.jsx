@@ -462,7 +462,7 @@ function Another({outpassBackpage, outpassjson, inpassServer}){
         onChange={(e) => setInputcache(e.target.value)}
         placeholder="your message"
       />
-      <button onClick={handleSend}>sendx2</button>
+      <button onClick={handleSend}>send</button>
     </div>
   );
 }
@@ -470,7 +470,7 @@ function Another({outpassBackpage, outpassjson, inpassServer}){
 
 
 function ShowChat(){
-
+  
 }
 
 
