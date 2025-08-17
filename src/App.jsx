@@ -470,9 +470,6 @@ function Another({outpassBackpage, outpassjson, inpassServer}){
 
 
 function ShowChat(){
-  
-
-
 
 }
 
