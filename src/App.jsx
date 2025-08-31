@@ -463,32 +463,9 @@ function Another({outpassBackpage, outpassjson, inpassServer}){
 
 
 
-function ApiResponseArea(){
-  const [text, setText] = useState("");
-  return(
-    <>
-      <div style={{display:"flex",width:"400px"}}>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="api response input"
-          style={{width:"400px",height:"400px"}}
-        />
-      </div>
-    </>
-  )
-}
 function InputOutputSection({inpass}){
   //inpass is a json passed from an outside var. at beginning, outside var is empty so it uses the hardcoded data here
   if (inpass == '') inpass = [
-    {
-      "thecell": "0",
-      "thevalue": "zero"
-    },
-    {
-      "thecell": "1",
-      "thevalue": "one"
-    },
     {
       "sender": "user",
       "text": "hello"
@@ -496,7 +473,7 @@ function InputOutputSection({inpass}){
     {
       "sender": "bot",
       "text": "Đây là lời giải:\n$$ 2x^2+4x-1=0 $$\nSử dụng công thức nghiệm của phương trình bậc hai $ax^2+bx+c=0$, ta có $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$.\nTrong đó: $a=2$, $b=4$, $c=-1$.\n\nTính delta ($\\Delta$):\n$$ \\Delta = b^2 - 4ac = 4^2 - 4(2)(-1) $$\n$$ \\Delta = 16 + 8 $$\n$$ \\Delta = 24 $$\nVì $\\Delta > 0$, phương trình có hai nghiệm phân biệt:\n$$ x = \\frac{-4 \\pm \\sqrt{24}}{2(2)} $$\n$$ x = \\frac{-4 \\pm \\sqrt{4 \\cdot 6}}{4} $$\n$$ x = \\frac{-4 \\pm 2\\sqrt{6}}{4} $$\nChia cả tử và mẫu cho 2:\n$$ x = \\frac{-2 \\pm \\sqrt{6}}{2} $$\nVậy hai nghiệm của phương trình là:\n$$ x_1 = \\frac{-2 + \\sqrt{6}}{2} $$\n$$ x_2 = \\frac{-2 - \\sqrt{6}}{2} $$"
-  }
+    }
   ]
   //myjson = inpass, from now on
   const [myjson, setMyjson] = useState(inpass);
@@ -512,35 +489,227 @@ function InputOutputSection({inpass}){
     setMyjson((prev) => [...prev, { sender: 'bot', text: botinput }]);
   }
 
+
+
+
+
+
+  const [inputValue, setInputValue] = useState('');
+  const [outputValue, setOutputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+
+  const callGeminiAPI = async () => {
+    if (!inputValue) {
+      setError('Please enter a prompt.');
+      return;
+    }
+
+    setMyjson((prev) => [...prev, { sender: 'user', text: inputValue }]);
+
+    setIsLoading(true); // Show loading indicator
+    setError(null); // Clear previous errors
+    setInputValue(''); // Clear previous output
+
+    try {
+      const payload = {
+        contents: [{
+          role: "user",
+          parts: [{
+            text: inputValue
+          }]
+        }],
+      };
+
+      const apiKey = "AIzaSyB-9Jc4A0Ddi13WXD-ICQ_rfDchjHTIr80";
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={apiKey}`;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (result.candidates && result.candidates.length > 0 &&
+        result.candidates[0].content && result.candidates[0].content.parts &&
+        result.candidates[0].content.parts.length > 0) {
+        const text = result.candidates[0].content.parts[0].text;
+        setOutputValue(text);
+        setBotinput(text);
+      } else {
+        throw new Error("Invalid response structure from API.");
+      }
+
+    } catch (e) {
+      console.error('API call failed:', e);
+      setError(`Failed to get a response. ${e.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
+    }
+  }, [myjson]);
+
+
+  const sendMyjsonToBackend = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/save-myjson', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(myjson),
+      });
+      if (!response.ok) throw new Error('Failed to save myjson');
+      alert('myjson saved to backend!');
+    } catch (err) {
+      alert('Error saving myjson: ' + err.message);
+    }
+  };
+
+
+  
+
   return(
     <>
-      <div style={{display:"flex"}}>
+      <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
         <textarea
-          value={userinput}
-          onChange={(e) => setUserinput(e.target.value)}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
           placeholder="user to chat"
+          style={{
+            borderRadius: "12px",
+            border: "1px solid #ccc",
+            padding: "10px",
+            fontSize: "1em",
+            width: "220px",
+            resize: "vertical",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.07)"
+          }}
         />
-        <button onClick={handleUserInput}>send</button>
+        <button
+          onClick={sendMyjsonToBackend}
+          style={{
+            borderRadius: "20px",
+            background: "#4f8cff",
+            color: "#fff",
+            border: "none",
+            padding: "10px 24px",
+            fontWeight: "bold",
+            fontSize: "1em",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+            transition: "transform 0.15s"
+          }}
+          onMouseDown={e => e.currentTarget.style.transform = "scale(0.92)"}
+          onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
+          onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+        >
+          send1
+        </button>
       </div>
-      <div style={{display:"flex"}}>
+      <textarea
+        value={outputValue}
+        style={{
+          borderRadius: "12px",
+          border: "1px solid #ccc",
+          padding: "10px",
+          fontSize: "1em",
+          width: "220px",
+          marginBottom: "12px",
+          resize: "vertical",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.07)"
+        }}
+      />
+      <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
         <textarea
           value={botinput}
           onChange={(e) => setBotinput(e.target.value)}
           placeholder="bot to chat"
+          style={{
+            borderRadius: "12px",
+            border: "1px solid #ccc",
+            padding: "10px",
+            fontSize: "1em",
+            width: "220px",
+            resize: "vertical",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.07)"
+          }}
         />
-        <button onClick={handleBotInput}>send</button>
+        <button
+          onClick={handleBotInput}
+          style={{
+            borderRadius: "20px",
+            background: "#ffb84f",
+            color: "#fff",
+            border: "none",
+            padding: "10px 24px",
+            fontWeight: "bold",
+            fontSize: "1em",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+            transition: "transform 0.15s"
+          }}
+          onMouseDown={e => e.currentTarget.style.transform = "scale(0.92)"}
+          onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
+          onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+        >
+          send
+        </button>
       </div>
 
-      <div>
+
+      <div
+        ref={messagesEndRef}
+        style={{
+          height: '600px',
+          overflowY: 'auto',
+          border: '1px solid #ccc',
+          padding: '10px',
+          background: '#f9f9f9',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          marginTop: '16px'
+        }}
+      >
         {myjson.map((item, idx) => (
-          <div key={idx}>
-            <strong>{item.sender}</strong>
-            {item.text && <MathRenderer text={item.text}/>}
+          <div
+            key={idx}
+            style={{
+              alignSelf: item.sender === 'user' ? 'flex-end' : 'flex-start',
+              background: item.sender === 'user' ? '#d1e7dd' : '#e2e3e5',
+              padding: '8px 12px',
+              borderRadius: '16px',
+              maxWidth: '70%',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+            }}
+          >
+            <strong style={{fontSize: '0.9em'}}>{item.sender}</strong>
+            <div>
+              {item.text && <MathRenderer text={item.text}/>}
+            </div>
           </div>
         ))}
       </div>
 
-      
+      {/* <pre>{JSON.stringify(myjson, null, 2)}</pre> */}
     </>
   )
 }
