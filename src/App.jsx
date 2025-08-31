@@ -583,7 +583,6 @@ function InputOutputSection({inpass}){
     }
   };
 
-
   
 
   return(
@@ -593,6 +592,7 @@ function InputOutputSection({inpass}){
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="user to chat"
+          autoFocus
           style={{
             borderRadius: "12px",
             border: "1px solid #ccc",
