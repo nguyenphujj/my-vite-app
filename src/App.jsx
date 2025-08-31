@@ -34,7 +34,9 @@ function MathRenderer({ text }) {
 }
 
 
+
 function JsonDisplayPage({outpasserLoginState, outpass2, inpass}){
+  //inpass is a json passed from an outside var. at beginning, outside var is empty so it uses the hardcoded data here
   if (inpass == '') inpass = [
     {
       "thecell": "0",
@@ -45,25 +47,20 @@ function JsonDisplayPage({outpasserLoginState, outpass2, inpass}){
       "thevalue": "one"
     },
     {
-      "thecell": "222",
-      "thevalue": "two two two"
-    },
-    {
       "sender": "user",
-      "text": "haha"
+      "text": "hello"
     },
     {
       "sender": "bot",
       "text": "this is a test for initializing"
     }
   ]
+  //myjson = inpass, from now on
   const [myjson, setMyjson] = useState(inpass);
 
-
+  /* 
   const [foundvalue, setFoundvalue] = useState('')
   const [input, setInput] = useState('')
-  const [index, setIndex] = useState(0)
-
 
   function handleClick1(){
     setMyjson((prev) => [...prev, { user: 'user1', text: 'text from user1' }]);
@@ -75,14 +72,13 @@ function JsonDisplayPage({outpasserLoginState, outpass2, inpass}){
     setMyjson((prev0) => [...prev0, user2text]);
   }
 
-
   function handleFind(){
     const myfound = myjson.find((c) => c.thecell === input);
     if(myfound){
       setFoundvalue(myfound.thevalue)
     }
   }
-
+  */
   
 
   const [userinput, setUserinput] = useState('')
@@ -98,16 +94,16 @@ function JsonDisplayPage({outpasserLoginState, outpass2, inpass}){
 
 
 
-  function handleBack(){
+  /* function handleBack(){
     outpass2(myjson)
     outpasserLoginState(false)
-  }
+  } */
 
 
   return(
     <>
       {/* <div>{myjson[0].thevalue}</div> */}
-      <button onClick={handleBack}>back</button>
+      {/* <button onClick={handleBack}>back</button>
       <br />
 
       <button onClick={handleClick1}>user1click</button>
@@ -121,12 +117,10 @@ function JsonDisplayPage({outpasserLoginState, outpass2, inpass}){
         />
         <button onClick={handleFind}>find</button>
         <div>{foundvalue}</div>
-      </div>
+      </div> */}
 
       
       <pre>{JSON.stringify(myjson, null, 2)}</pre>
-
-
 
       <div>
         <textarea
@@ -145,12 +139,10 @@ function JsonDisplayPage({outpasserLoginState, outpass2, inpass}){
         <button onClick={handleBotInput}>send</button>
       </div>
 
-
-
       <div>
         {myjson.map((item, idx) => (
           <div key={idx}>
-            {item.sender}: {/* {item.text} */}
+            <strong>{item.sender}</strong>
             {item.text && <MathRenderer text={item.text}/>}
           </div>
         ))}
@@ -469,8 +461,96 @@ function Another({outpassBackpage, outpassjson, inpassServer}){
 
 
 
-function ShowChat(){
-  
+
+
+function ApiResponseArea(){
+  const [text, setText] = useState("");
+  return(
+    <>
+      <div style={{display:"flex",width:"400px"}}>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="api response input"
+          style={{width:"400px",height:"400px"}}
+        />
+      </div>
+    </>
+  )
+}
+function InputOutputSection({inpass}){
+  //inpass is a json passed from an outside var. at beginning, outside var is empty so it uses the hardcoded data here
+  if (inpass == '') inpass = [
+    {
+      "thecell": "0",
+      "thevalue": "zero"
+    },
+    {
+      "thecell": "1",
+      "thevalue": "one"
+    },
+    {
+      "sender": "user",
+      "text": "hello"
+    },
+    {
+      "sender": "bot",
+      "text": "this is a test"
+    }
+  ]
+  //myjson = inpass, from now on
+  const [myjson, setMyjson] = useState(inpass);
+
+  const [userinput, setUserinput] = useState('')
+  const [botinput, setBotinput] = useState('')
+  function handleUserInput(){
+    setUserinput('')
+    setMyjson((prev) => [...prev, { sender: 'user', text: userinput }]);
+  }
+  function handleBotInput(){
+    setBotinput('')
+    setMyjson((prev) => [...prev, { sender: 'bot', text: botinput }]);
+  }
+
+  return(
+    <>
+      <div style={{display:"flex"}}>
+        <textarea
+          value={userinput}
+          onChange={(e) => setUserinput(e.target.value)}
+          placeholder="user to chat"
+        />
+        <button onClick={handleUserInput}>send</button>
+      </div>
+      <div style={{display:"flex"}}>
+        <textarea
+          value={botinput}
+          onChange={(e) => setBotinput(e.target.value)}
+          placeholder="bot to chat"
+        />
+        <button onClick={handleBotInput}>send</button>
+      </div>
+
+      <div>
+        {myjson.map((item, idx) => (
+          <div key={idx}>
+            <strong>{item.sender}</strong>
+            {item.text && <MathRenderer text={item.text}/>}
+          </div>
+        ))}
+      </div>
+
+      <pre>{JSON.stringify(myjson, null, 2)}</pre>
+    </>
+  )
+}
+function AllInOnePage(){
+  const [jsoncache, setJsoncache] = useState("");
+  return(
+    <>
+      <InputOutputSection inpass={jsoncache}/>
+    </>
+  )
 }
 
 
@@ -478,20 +558,18 @@ function ShowChat(){
 
 
 
-
-
 function Login_Add(){
-  const [jsoncache, setjsoncache] = useState(false);
-  const [atpage, setAtpage] = useState(1);
+  const [jsoncache, setJsoncache] = useState("");
+  const [atpage, setAtpage] = useState(99);
   const [server, setServer] = useState('')
-
   return (
     <>
       <div>
         {atpage == 0 && <LoginPage outpassPage={setAtpage} />}
-        {atpage == 111 && <JsonDisplayPage outpasserLoginState={setIslogin} outpass2={setjsoncache} inpass={jsoncache}/>}
+        {atpage == 123 && <JsonDisplayPage outpass2={setJsoncache} inpass={jsoncache}/>}
         {atpage == 111 && <ChatPage />}
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
+        {atpage == 99 && <AllInOnePage />}
       </div>
     </>
   );
