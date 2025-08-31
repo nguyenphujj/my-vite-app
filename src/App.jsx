@@ -540,7 +540,7 @@ function InputOutputSection({inpass}){
         ))}
       </div>
 
-      <pre>{JSON.stringify(myjson, null, 2)}</pre>
+      
     </>
   )
 }
