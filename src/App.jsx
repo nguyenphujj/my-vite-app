@@ -587,7 +587,8 @@ function InputOutputSection({inpass}){
 
   return(
     <>
-      <div style={{ display: "flex"}}>
+      <div>haha</div>
+      {/* <div style={{ display: "flex"}}>
         <textarea
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
@@ -597,9 +598,9 @@ function InputOutputSection({inpass}){
         <button onClick={sendMyjsonToBackend}>
           send1
         </button>
-      </div>
+      </div> */}
 
-      <textarea
+      {/* <textarea
         value={outputValue}
       />
 
@@ -612,11 +613,12 @@ function InputOutputSection({inpass}){
         <button onClick={handleBotInput}>
           send2
         </button>
-      </div>
+      </div> */}
 
 
       <div
         ref={messagesEndRef}
+        id='messagescontainer'
         style={{
           height: '700px',
           overflowY: 'auto',
@@ -630,13 +632,12 @@ function InputOutputSection({inpass}){
             style={{
               alignSelf: item.sender === 'user' ? 'flex-end' : 'flex-start',
               background: item.sender === 'user' ? '#d1e7dd' : '#f5f5f5ff',
-              padding: '8px 12px',
+              padding: '8px',
               borderRadius: '16px',
               maxWidth: '80%',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
             }}
           >
-            <strong style={{fontSize: '0.9em'}}>{item.sender}</strong>
+            <strong>{item.sender}</strong>
             <div>
               {item.text && <MathRenderer text={item.text}/>}
             </div>
