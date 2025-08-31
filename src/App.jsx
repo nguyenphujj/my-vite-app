@@ -587,90 +587,30 @@ function InputOutputSection({inpass}){
 
   return(
     <>
-      <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
+      <div style={{ display: "flex"}}>
         <textarea
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="user to chat"
           autoFocus
-          style={{
-            borderRadius: "12px",
-            border: "1px solid #ccc",
-            padding: "10px",
-            fontSize: "1em",
-            width: "220px",
-            resize: "vertical",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.07)"
-          }}
         />
-        <button
-          onClick={sendMyjsonToBackend}
-          style={{
-            borderRadius: "20px",
-            background: "#4f8cff",
-            color: "#fff",
-            border: "none",
-            padding: "10px 24px",
-            fontWeight: "bold",
-            fontSize: "1em",
-            cursor: "pointer",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
-            transition: "transform 0.15s"
-          }}
-          onMouseDown={e => e.currentTarget.style.transform = "scale(0.92)"}
-          onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
-          onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-        >
+        <button onClick={sendMyjsonToBackend}>
           send1
         </button>
       </div>
+
       <textarea
         value={outputValue}
-        style={{
-          borderRadius: "12px",
-          border: "1px solid #ccc",
-          padding: "10px",
-          fontSize: "1em",
-          width: "220px",
-          marginBottom: "12px",
-          resize: "vertical",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.07)"
-        }}
       />
-      <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
+
+      <div style={{ display: "flex" }}>
         <textarea
           value={botinput}
           onChange={(e) => setBotinput(e.target.value)}
           placeholder="bot to chat"
-          style={{
-            borderRadius: "12px",
-            border: "1px solid #ccc",
-            padding: "10px",
-            fontSize: "1em",
-            width: "220px",
-            resize: "vertical",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.07)"
-          }}
         />
-        <button
-          onClick={handleBotInput}
-          style={{
-            borderRadius: "20px",
-            background: "#ffb84f",
-            color: "#fff",
-            border: "none",
-            padding: "10px 24px",
-            fontWeight: "bold",
-            fontSize: "1em",
-            cursor: "pointer",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
-            transition: "transform 0.15s"
-          }}
-          onMouseDown={e => e.currentTarget.style.transform = "scale(0.92)"}
-          onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
-          onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-        >
-          send
+        <button onClick={handleBotInput}>
+          send2
         </button>
       </div>
 
@@ -678,15 +618,10 @@ function InputOutputSection({inpass}){
       <div
         ref={messagesEndRef}
         style={{
-          height: '600px',
+          height: '700px',
           overflowY: 'auto',
-          border: '1px solid #ccc',
-          padding: '10px',
-          background: '#f9f9f9',
           display: 'flex',
           flexDirection: 'column',
-          gap: '8px',
-          marginTop: '16px'
         }}
       >
         {myjson.map((item, idx) => (
@@ -694,10 +629,10 @@ function InputOutputSection({inpass}){
             key={idx}
             style={{
               alignSelf: item.sender === 'user' ? 'flex-end' : 'flex-start',
-              background: item.sender === 'user' ? '#d1e7dd' : '#e2e3e5',
+              background: item.sender === 'user' ? '#d1e7dd' : '#f5f5f5ff',
               padding: '8px 12px',
               borderRadius: '16px',
-              maxWidth: '70%',
+              maxWidth: '80%',
               boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
             }}
           >
