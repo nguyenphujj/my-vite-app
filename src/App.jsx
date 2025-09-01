@@ -5,6 +5,9 @@ import { InlineMath, BlockMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 
 
+import "./MessagingUI.css";
+
+
 
 
 
@@ -742,7 +745,7 @@ function Whatsapp() {
       flex: 1,
       padding: '10px',
       overflowY: 'auto',
-      backgroundColor: 'lightgray',
+      backgroundColor: 'indigo',
       
     },
     message: {
@@ -939,11 +942,56 @@ function ViewportUI() {
 
 
 
+function MessagingUI() {
+  const [messages, setMessages] = useState([
+    "Hello!",
+    "Welcome to the chat!",
+  ]);
+  const [input, setInput] = useState("");
+  const messagesEndRef = useRef(null);
+
+  const handleSend = () => {
+    if (input.trim() === "") return;
+    setMessages((prev) => [...prev, input]);
+    setInput("");
+  };
+
+  // Auto-scroll to latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  return (
+    <div className="chatContainer">
+      <div className="messageContainer">
+        {messages.map((msg, i) => (
+          <div key={i} className="message">
+            {msg}
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="inputContainer">
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a message..."
+        />
+        <button onClick={handleSend}>Send</button>
+      </div>
+    </div>
+  );
+}
+
+
+
+
 
 
 function Login_Add(){
   const [jsoncache, setJsoncache] = useState("");
-  const [atpage, setAtpage] = useState(22);
+  const [atpage, setAtpage] = useState(33);
   const [server, setServer] = useState('')
   return (
     <>
@@ -954,6 +1002,7 @@ function Login_Add(){
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
         {atpage == 99 && <AllInOnePage />}
         {atpage == 22 && <Whatsapp />}
+        {atpage == 33 && <MessagingUI />}
       </div>
     </>
   );
