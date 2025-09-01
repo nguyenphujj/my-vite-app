@@ -616,7 +616,7 @@ function InputOutputSection({inpass}){
       </div> */}
 
 
-      <div
+      {/* <div
         ref={messagesEndRef}
         id='messagescontainer'
         style={{
@@ -643,7 +643,7 @@ function InputOutputSection({inpass}){
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
 
       {/* <pre>{JSON.stringify(myjson, null, 2)}</pre> */}
     </>
