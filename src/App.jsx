@@ -800,6 +800,115 @@ function Whatsapp() {
 
 
 
+function ViewportUI() {
+  const [messages, setMessages] = useState([
+    "Hello!",
+    "How are you?",
+    "This is a test message."
+  ]);
+  const [input, setInput] = useState("");
+  const messagesEndRef = useRef(null);
+
+  // Fix for mobile viewport height (dynamic resizing)
+  useEffect(() => {
+    const setVh = () => {
+      document.documentElement.style.setProperty(
+        "--vh",
+        `${window.innerHeight * 0.01}px`
+      );
+    };
+    setVh();
+    window.addEventListener("resize", setVh);
+    return () => window.removeEventListener("resize", setVh);
+  }, []);
+
+  // Auto-scroll to latest message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const sendMessage = () => {
+    if (!input.trim()) return;
+    setMessages([...messages, input]);
+    setInput("");
+  };
+
+  return (
+    <div>
+      <style>{`
+        .chat-container {
+          height: calc(var(--vh, 1vh) * 100);
+          display: flex;
+          flex-direction: column;
+          font-family: sans-serif;
+        }
+        .messages {
+          flex: 1;
+          overflow-y: auto;
+          padding: 10px;
+          background: #f5f5f5;
+        }
+        .message {
+          background: white;
+          margin-bottom: 8px;
+          padding: 8px 12px;
+          border-radius: 16px;
+          max-width: 75%;
+          word-wrap: break-word;
+          box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .input-area {
+          display: flex;
+          border-top: 1px solid #ddd;
+          background: #fff;
+          padding: 6px;
+        }
+        .input-area input {
+          flex: 1;
+          padding: 10px;
+          border: 1px solid #ccc;
+          border-radius: 20px;
+          outline: none;
+        }
+        .input-area button {
+          margin-left: 6px;
+          padding: 10px 16px;
+          border: none;
+          border-radius: 20px;
+          background: #007bff;
+          color: white;
+          cursor: pointer;
+        }
+      `}</style>
+
+      <div className="chat-container">
+        <div className="messages">
+          {messages.map((msg, idx) => (
+            <div key={idx} className="message">
+              {msg}
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+        <div className="input-area">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            placeholder="Type a message..."
+          />
+          <button onClick={sendMessage}>Send</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
 
 function Login_Add(){
   const [jsoncache, setJsoncache] = useState("");
@@ -813,7 +922,7 @@ function Login_Add(){
         {atpage == 111 && <ChatPage />}
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
         {atpage == 99 && <AllInOnePage />}
-        {atpage == 22 && <Whatsapp />}
+        {atpage == 22 && <ViewportUI />}
       </div>
     </>
   );
