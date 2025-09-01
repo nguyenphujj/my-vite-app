@@ -703,7 +703,7 @@ function Whatsapp() {
     container: {
       maxWidth: '600px',
       margin: '0 auto',
-      height: '97vh',
+      height: '90vh',
       display: 'flex',
       flexDirection: 'column',
       border: '1px solid #ccc',
