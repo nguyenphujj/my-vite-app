@@ -711,35 +711,30 @@ function Whatsapp() {
 
   const styles = {
     container: {
-    maxWidth: '600px',
-    margin: '0 auto',
-    height: '100vh', // Fixed viewport height
-    display: 'flex',
-    flexDirection: 'column',
-    border: '1px solid #ccc',
-    fontFamily: 'Arial, sans-serif',
-    position: 'fixed', // Fix container to viewport
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: '#fff', // Prevent transparency
-    zIndex: 10 // Ensure it's above other content
-  },
-  header: {
-    padding: '15px',
-    backgroundColor: '#075E54',
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: '18px'
-  },
-  messagesContainer: {
-    flex: 1,
-    padding: '10px',
-    overflowY: 'auto',
-    backgroundColor: '#ECE5DD',
-    minHeight: 0 // Prevent flex children from overflowing
-  },
+      maxWidth: '600px',
+      margin: '0 auto',
+      height: '97vh',
+      display: 'flex',
+      flexDirection: 'column',
+      border: '1px solid #ccc',
+      fontFamily: 'Arial, sans-serif',
+      position: 'relative', // Add this
+      background: 'blue'
+    },
+    header: {
+      padding: '15px',
+      backgroundColor: '#075E54',
+      color: 'white',
+      fontWeight: 'bold',
+      fontSize: '18px'
+    },
+    messagesContainer: {
+      flex: 1,
+      padding: '10px',
+      overflowY: 'auto',
+      backgroundColor: 'red',
+      
+    },
     message: {
       marginBottom: '10px',
       padding: '10px',
@@ -756,10 +751,19 @@ function Whatsapp() {
       backgroundColor: 'white',
     },
     inputContainer: {
+      position: 'fixed', // Make it fixed
+      left: 0,
+      right: 0,
+      bottom: 0,
+      maxWidth: '600px',
+      margin: '0 auto',
       display: 'flex',
       borderTop: '1px solid #ccc',
       padding: '10px',
-      backgroundColor: '#f0f0f0'
+      backgroundColor: 'black',
+      zIndex: 10,
+      boxSizing: 'border-box',
+      height: '70px', // Set a fixed height
     },
     input: {
       flex: 1,
@@ -783,17 +787,7 @@ function Whatsapp() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.inputContainer}>
-        <textarea
-          style={styles.input}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message"
-        />
-        <button style={styles.button} onClick={sendMessage}>
-          Send
-        </button>
-      </div>
+      
       <div style={styles.messagesContainer}>
         {messages.map((msg, idx) => (
           <div
@@ -808,7 +802,17 @@ function Whatsapp() {
         ))}
         <div ref={messagesEndRef} />
       </div>
-      
+      <div style={styles.inputContainer}>
+        <textarea
+          style={styles.input}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a message"
+        />
+        <button style={styles.button} onClick={sendMessage}>
+          Send
+        </button>
+      </div>
     </div>
   );
 };
