@@ -667,9 +667,19 @@ function AllInOnePage(){
 
 
 function Whatsapp() {
-  const [messages, setMessages] = useState([
-    { text: 'Hello! How can I help you today?', sender: 'bot' }
-  ]);
+  let inpass = [
+    {
+      "sender": "user",
+      "text": "hello"
+    },
+    {
+      "sender": "bot",
+      "text": "Đây là lời giải:\n$$ 2x^2+4x-1=0 $$\nSử dụng công thức nghiệm của phương trình bậc hai $ax^2+bx+c=0$, ta có $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$.\nTrong đó: $a=2$, $b=4$, $c=-1$.\n\nTính delta ($\\Delta$):\n$$ \\Delta = b^2 - 4ac = 4^2 - 4(2)(-1) $$\n$$ \\Delta = 16 + 8 $$\n$$ \\Delta = 24 $$\nVì $\\Delta > 0$, phương trình có hai nghiệm phân biệt:\n$$ x = \\frac{-4 \\pm \\sqrt{24}}{2(2)} $$\n$$ x = \\frac{-4 \\pm \\sqrt{4 \\cdot 6}}{4} $$\n$$ x = \\frac{-4 \\pm 2\\sqrt{6}}{4} $$\nChia cả tử và mẫu cho 2:\n$$ x = \\frac{-2 \\pm \\sqrt{6}}{2} $$\nVậy hai nghiệm của phương trình là:\n$$ x_1 = \\frac{-2 + \\sqrt{6}}{2} $$\n$$ x_2 = \\frac{-2 - \\sqrt{6}}{2} $$"
+    }
+  ]
+
+
+  const [messages, setMessages] = useState(inpass);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
 
@@ -701,27 +711,35 @@ function Whatsapp() {
 
   const styles = {
     container: {
-      maxWidth: '600px',
-      margin: '0 auto',
-      height: '98vh',
-      display: 'flex',
-      flexDirection: 'column',
-      border: '1px solid #ccc',
-      fontFamily: 'Arial, sans-serif'
-    },
-    header: {
-      padding: '15px',
-      backgroundColor: '#075E54',
-      color: 'white',
-      fontWeight: 'bold',
-      fontSize: '18px'
-    },
-    messagesContainer: {
-      flex: 1,
-      padding: '10px',
-      overflowY: 'auto',
-      backgroundColor: '#ECE5DD'
-    },
+    maxWidth: '600px',
+    margin: '0 auto',
+    height: '100vh', // Fixed viewport height
+    display: 'flex',
+    flexDirection: 'column',
+    border: '1px solid #ccc',
+    fontFamily: 'Arial, sans-serif',
+    position: 'fixed', // Fix container to viewport
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: '#fff', // Prevent transparency
+    zIndex: 10 // Ensure it's above other content
+  },
+  header: {
+    padding: '15px',
+    backgroundColor: '#075E54',
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: '18px'
+  },
+  messagesContainer: {
+    flex: 1,
+    padding: '10px',
+    overflowY: 'auto',
+    backgroundColor: '#ECE5DD',
+    minHeight: 0 // Prevent flex children from overflowing
+  },
     message: {
       marginBottom: '10px',
       padding: '10px',
@@ -775,17 +793,16 @@ function Whatsapp() {
               ...(msg.sender === 'user' ? styles.userMessage : styles.botMessage)
             }}
           >
-            {msg.text}
+            {msg.text && <MathRenderer text={msg.text} />}
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
       <div style={styles.inputContainer}>
-        <input
+        <textarea
           style={styles.input}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
           placeholder="Type a message"
         />
         <button style={styles.button} onClick={sendMessage}>
