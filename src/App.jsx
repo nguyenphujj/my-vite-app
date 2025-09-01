@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 import { InlineMath, BlockMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
@@ -587,8 +587,9 @@ function InputOutputSection({inpass}){
 
   return(
     <>
-      <div>haha</div>
-      {/* <div style={{ display: "flex"}}>
+      <div style={{height:"600px",width:"200px",backgroundColor:"gray"}}>
+        <div>haha</div>
+        {/* <div style={{ display: "flex"}}>
         <textarea
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
@@ -600,52 +601,55 @@ function InputOutputSection({inpass}){
         </button>
       </div> */}
 
-      {/* <textarea
-        value={outputValue}
-      />
+        {/* <textarea
+          value={outputValue}
+        /> */}
 
-      <div style={{ display: "flex" }}>
-        <textarea
-          value={botinput}
-          onChange={(e) => setBotinput(e.target.value)}
-          placeholder="bot to chat"
-        />
-        <button onClick={handleBotInput}>
-          send2
-        </button>
-      </div> */}
+        {/* <div style={{ display: "flex" }}>
+          <textarea
+            value={botinput}
+            onChange={(e) => setBotinput(e.target.value)}
+            placeholder="bot to chat"
+          />
+          <button onClick={handleBotInput}>
+            send2
+          </button>
+        </div> */}
 
 
-      {/* <div
-        ref={messagesEndRef}
-        id='messagescontainer'
-        style={{
-          height: '700px',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        {myjson.map((item, idx) => (
-          <div
-            key={idx}
-            style={{
-              alignSelf: item.sender === 'user' ? 'flex-end' : 'flex-start',
-              background: item.sender === 'user' ? '#d1e7dd' : '#f5f5f5ff',
-              padding: '8px',
-              borderRadius: '16px',
-              maxWidth: '80%',
-            }}
-          >
-            <strong>{item.sender}</strong>
-            <div>
-              {item.text && <MathRenderer text={item.text}/>}
+        <div
+          /* ref={messagesEndRef}
+          id='messagescontainer' */
+          style={{
+            height: '400px',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            width: '80%',
+          }}
+        >
+          {myjson.map((item, idx) => (
+            <div
+              key={idx}
+              style={{
+                alignSelf: item.sender === 'user' ? 'flex-end' : 'flex-start',
+                background: item.sender === 'user' ? '#d1e7dd' : '#f5f5f5ff',
+                borderRadius: '16px',
+                maxWidth: '80%',
+              }}
+            >
+              <strong>{item.sender}</strong>
+              <div>
+                {item.text && <MathRenderer text={item.text} />}
+              </div>
             </div>
-          </div>
-        ))}
-      </div> */}
+          ))}
+        </div>
 
-      {/* <pre>{JSON.stringify(myjson, null, 2)}</pre> */}
+        {/* <pre>{JSON.stringify(myjson, null, 2)}</pre> */}
+
+      </div>
+      
     </>
   )
 }
@@ -662,10 +666,148 @@ function AllInOnePage(){
 
 
 
+function Whatsapp() {
+  const [messages, setMessages] = useState([
+    { text: 'Hello! How can I help you today?', sender: 'bot' }
+  ]);
+  const [input, setInput] = useState('');
+  const messagesEndRef = useRef(null);
+
+  const sendMessage = () => {
+    if (input.trim() === '') return;
+
+    const newMessage = { text: input, sender: 'user' };
+    setMessages((prev) => [...prev, newMessage]);
+    setInput('');
+
+    // Simulate bot response
+    setTimeout(() => {
+      const botReplies = [
+        "That's interesting!",
+        "Can you tell me more?",
+        "I'm just a bot, but I'm listening.",
+        "Thanks for sharing!",
+        "Let me think about that..."
+      ];
+      const randomReply =
+        botReplies[Math.floor(Math.random() * botReplies.length)];
+      setMessages((prev) => [...prev, { text: randomReply, sender: 'bot' }]);
+    }, 1000);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') sendMessage();
+  };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const styles = {
+    container: {
+      maxWidth: '600px',
+      margin: '0 auto',
+      height: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      border: '1px solid #ccc',
+      fontFamily: 'Arial, sans-serif'
+    },
+    header: {
+      padding: '15px',
+      backgroundColor: '#075E54',
+      color: 'white',
+      fontWeight: 'bold',
+      fontSize: '18px'
+    },
+    messagesContainer: {
+      flex: 1,
+      padding: '10px',
+      overflowY: 'auto',
+      backgroundColor: '#ECE5DD'
+    },
+    message: {
+      marginBottom: '10px',
+      padding: '10px',
+      borderRadius: '8px',
+      maxWidth: '70%',
+      wordWrap: 'break-word'
+    },
+    userMessage: {
+      alignSelf: 'flex-end',
+      backgroundColor: '#DCF8C6',
+    },
+    botMessage: {
+      alignSelf: 'flex-start',
+      backgroundColor: 'white',
+    },
+    inputContainer: {
+      display: 'flex',
+      borderTop: '1px solid #ccc',
+      padding: '10px',
+      backgroundColor: '#f0f0f0'
+    },
+    input: {
+      flex: 1,
+      padding: '10px',
+      fontSize: '16px',
+      borderRadius: '20px',
+      border: '1px solid #ccc',
+      outline: 'none'
+    },
+    button: {
+      marginLeft: '10px',
+      padding: '10px 15px',
+      fontSize: '16px',
+      backgroundColor: '#128C7E',
+      color: 'white',
+      border: 'none',
+      borderRadius: '20px',
+      cursor: 'pointer'
+    }
+  };
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.header}>Chat with Bot</div>
+      <div style={styles.messagesContainer}>
+        {messages.map((msg, idx) => (
+          <div
+            key={idx}
+            style={{
+              ...styles.message,
+              ...(msg.sender === 'user' ? styles.userMessage : styles.botMessage)
+            }}
+          >
+            {msg.text}
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+      <div style={styles.inputContainer}>
+        <input
+          style={styles.input}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Type a message"
+        />
+        <button style={styles.button} onClick={sendMessage}>
+          Send
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
 
 function Login_Add(){
   const [jsoncache, setJsoncache] = useState("");
-  const [atpage, setAtpage] = useState(99);
+  const [atpage, setAtpage] = useState(22);
   const [server, setServer] = useState('')
   return (
     <>
@@ -675,6 +817,7 @@ function Login_Add(){
         {atpage == 111 && <ChatPage />}
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
         {atpage == 99 && <AllInOnePage />}
+        {atpage == 22 && <Whatsapp />}
       </div>
     </>
   );
