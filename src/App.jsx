@@ -834,7 +834,7 @@ function ViewportUI() {
   };
 
   return (
-    <div>
+    <div style={{minHeight: "100vh",minWidth: "100vw"}}>
       <style>{`
         .chat-container {
           height: calc(var(--vh, 1vh) * 100);
