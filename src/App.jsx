@@ -5,9 +5,6 @@ import { InlineMath, BlockMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 
 
-import "./MessagingUI.css";
-
-
 
 
 
@@ -940,58 +937,141 @@ function ViewportUI() {
 }
 
 
-
-
 function MessagingUI() {
   const [messages, setMessages] = useState([
-    "Hello!",
-    "Welcome to the chat!",
+    "Hello 👋",
+    "This is a demo chat!",
   ]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
 
-  const handleSend = () => {
-    if (input.trim() === "") return;
-    setMessages((prev) => [...prev, input]);
-    setInput("");
-  };
-
-  // Auto-scroll to latest message
+  // Auto scroll to bottom when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const sendMessage = () => {
+    if (!input.trim()) return;
+    setMessages((prev) => [...prev, input.trim()]);
+    setInput("");
+  };
+
   return (
-    <div className="chatContainer">
-      <div className="messageContainer">
-        {messages.map((msg, i) => (
-          <div key={i} className="message">
-            {msg}
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
+    <>
+      <div className="chatApp">
+        <div className="topBar">Chat App</div>
+
+        <div className="messageContainer">
+          {messages.map((msg, i) => (
+            <div key={i} className="message">
+              {msg}
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+
+        <div className="inputContainer">
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type a message..."
+          />
+          <button onClick={sendMessage}>Send</button>
+        </div>
       </div>
 
-      <div className="inputContainer">
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message..."
-        />
-        <button onClick={handleSend}>Send</button>
-      </div>
-    </div>
+      <style>{`
+        * {
+          box-sizing: border-box;
+        }
+
+        body, html, #root {
+          height: 100%;
+          margin: 0;
+        }
+
+        .chatApp {
+          display: flex;
+          flex-direction: column;
+          height: 100vh; /* responsive to mobile keyboard changes */
+        }
+
+        .topBar {
+          flex: 0 0 50px; /* fixed height */
+          background: #007bff;
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+          font-weight: bold;
+          position: sticky;
+          top: 0;
+          z-index: 10;
+        }
+
+        .messageContainer {
+          flex: 1;
+          overflow-y: auto;
+          padding: 10px;
+          background: #f5f5f5;
+        }
+
+        .message {
+          background: white;
+          padding: 8px 12px;
+          margin: 6px 0;
+          border-radius: 8px;
+          max-width: 75%;
+          box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+          word-break: break-word;
+        }
+
+        .inputContainer {
+          flex: 0 0 auto;
+          display: flex;
+          align-items: center;
+          padding: 8px;
+          border-top: 1px solid #ddd;
+          background: white;
+          position: sticky;
+          bottom: 0;
+        }
+
+        .inputContainer textarea {
+          flex: 1;
+          resize: none;
+          padding: 8px;
+          font-size: 16px;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+          outline: none;
+        }
+
+        .inputContainer button {
+          margin-left: 8px;
+          padding: 8px 14px;
+          background: #007bff;
+          border: none;
+          border-radius: 6px;
+          color: white;
+          font-size: 16px;
+          cursor: pointer;
+        }
+
+        .inputContainer button:active {
+          background: #0056b3;
+        }
+      `}</style>
+    </>
   );
 }
 
 
 
-
-
-
 function Login_Add(){
   const [jsoncache, setJsoncache] = useState("");
-  const [atpage, setAtpage] = useState(33);
+  const [atpage, setAtpage] = useState(22);
   const [server, setServer] = useState('')
   return (
     <>
@@ -1001,8 +1081,7 @@ function Login_Add(){
         {atpage == 111 && <ChatPage />}
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
         {atpage == 99 && <AllInOnePage />}
-        {atpage == 22 && <Whatsapp />}
-        {atpage == 33 && <MessagingUI />}
+        {atpage == 22 && <MessagingUI />}
       </div>
     </>
   );
