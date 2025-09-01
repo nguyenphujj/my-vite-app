@@ -804,7 +804,7 @@ function ViewportUI() {
   const [messages, setMessages] = useState([
     "Hello!",
     "How are you?",
-    "This is a test message."
+    "tinhyeu maunang (good v song) the night we met (good opening) obel the curse (good mid) ncs popsicle (like omfg, easy to forget) spice girls spice up vicetone walk thru fire noi gio roi (the clinic) hoa tinh (popular c song, gentle, smooth) doi tuthe (xam family tren lung) je te des mots (sad modern symphony, sounds like you made me smile) in this shirt (famous tik, i am lost, astronaut space theme, sounds like moon kid) 2.10 sounds like what https://www.youtube.com/watch?v=6G1tP10MrqM neu anh trang ko den https://www.youtube.com/watch?v=7gbw51prf5Y tay trai chi trang (c song, high pitch desperate) tuong quan (sounds like tranh duyen) mynhan (sounds like the thai) don't you worry child (like avicii) duong mot chieu (repeated, da biet nhau tu lau, v) way down we go (tik, ooh ooh ooh' ooh ooh' ooh`) ngoinha hoahong (banchan anh buoc) who loves the sun (weird good melody) so phai ketthuc where the trap is (liverpool pressing animals), ali the game ins (mayweather) fourth of july (tik mom mom) put your records on intentionally i fuck with you palladio (classic good) calabria (ronaldinho, why you run) hoa co lau (v good flow, flow like em nguyen, but with neutral accent) tinh nguyet thanthoai (c very good)"
   ]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
@@ -834,7 +834,7 @@ function ViewportUI() {
   };
 
   return (
-    <div style={{minHeight: "100vh",minWidth: "100vw"}}>
+    <div>
       <style>{`
         .chat-container {
           height: calc(var(--vh, 1vh) * 100);
