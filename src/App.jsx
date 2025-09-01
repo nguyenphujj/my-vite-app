@@ -25,8 +25,18 @@ function MathRenderer({ text }) {
           const mathContent = part.slice(1, -1);
           return <InlineMath key={index}>{mathContent}</InlineMath>;
         } else {
-          // Regular text
-          return <span key={index}>{part}</span>;
+          // Regular text, handle multiline
+          const lines = part.split('\n');
+          return (
+            <span key={index}>
+              {lines.map((line, i) => (
+                <React.Fragment key={i}>
+                  {line}
+                  {i < lines.length - 1 && <br />}
+                </React.Fragment>
+              ))}
+            </span>
+          );
         }
       })}
     </div>
@@ -719,7 +729,7 @@ function Whatsapp() {
       border: '1px solid #ccc',
       fontFamily: 'Arial, sans-serif',
       position: 'relative', // Add this
-      background: 'blue'
+      background: '#fff'
     },
     header: {
       padding: '15px',
@@ -732,7 +742,7 @@ function Whatsapp() {
       flex: 1,
       padding: '10px',
       overflowY: 'auto',
-      backgroundColor: 'red',
+      backgroundColor: 'lightgray',
       
     },
     message: {
@@ -760,7 +770,7 @@ function Whatsapp() {
       display: 'flex',
       borderTop: '1px solid #ccc',
       padding: '10px',
-      backgroundColor: 'black',
+      backgroundColor: 'gray',
       zIndex: 10,
       boxSizing: 'border-box',
       height: '70px', // Set a fixed height
