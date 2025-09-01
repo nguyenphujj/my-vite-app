@@ -783,7 +783,17 @@ function Whatsapp() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.header}>Chat </div>
+      <div style={styles.inputContainer}>
+        <textarea
+          style={styles.input}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a message"
+        />
+        <button style={styles.button} onClick={sendMessage}>
+          Send
+        </button>
+      </div>
       <div style={styles.messagesContainer}>
         {messages.map((msg, idx) => (
           <div
@@ -798,17 +808,7 @@ function Whatsapp() {
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <div style={styles.inputContainer}>
-        <textarea
-          style={styles.input}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message"
-        />
-        <button style={styles.button} onClick={sendMessage}>
-          Send
-        </button>
-      </div>
+      
     </div>
   );
 };
