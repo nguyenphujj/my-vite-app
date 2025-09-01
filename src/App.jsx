@@ -703,7 +703,7 @@ function Whatsapp() {
     container: {
       maxWidth: '600px',
       margin: '0 auto',
-      height: '90vh',
+      height: '98vh',
       display: 'flex',
       flexDirection: 'column',
       border: '1px solid #ccc',
@@ -922,7 +922,7 @@ function Login_Add(){
         {atpage == 111 && <ChatPage />}
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
         {atpage == 99 && <AllInOnePage />}
-        {atpage == 22 && <ViewportUI />}
+        {atpage == 22 && <Whatsapp />}
       </div>
     </>
   );
