@@ -683,11 +683,7 @@ function Whatsapp() {
     // Simulate bot response
     setTimeout(() => {
       const botReplies = [
-        "That's interesting!",
-        "Can you tell me more?",
-        "I'm just a bot, but I'm listening.",
-        "Thanks for sharing!",
-        "Let me think about that..."
+        "Reaction & Structure The Protein Folding Problem Proteins are chains of amino acids that fold into precise 3D shapes. Predicting folding was unsolved for decades, though AI (like DeepMind’s AlphaFold) has made big progress. Still, the full rules of folding dynamics aren’t fully understood. Catalysis Mysteries Catalysts speed up reactions, but often chemists don’t fully know how at the atomic level. For example, nitrogen fixation (turning N₂ into ammonia) in biological enzymes and industrial processes is still not completely understood. Water’s Weirdness Water has dozens of unusual properties (it expands when frozen, high heat capacity, multiple liquid phases). The exact molecular explanation for some of these anomalies is still debated.",
       ];
       const randomReply =
         botReplies[Math.floor(Math.random() * botReplies.length)];
@@ -707,7 +703,7 @@ function Whatsapp() {
     container: {
       maxWidth: '600px',
       margin: '0 auto',
-      height: '100vh',
+      height: '97vh',
       display: 'flex',
       flexDirection: 'column',
       border: '1px solid #ccc',
@@ -769,7 +765,7 @@ function Whatsapp() {
 
   return (
     <div style={styles.container}>
-      <div style={styles.header}>Chat with Bot</div>
+      <div style={styles.header}>Chat </div>
       <div style={styles.messagesContainer}>
         {messages.map((msg, idx) => (
           <div
