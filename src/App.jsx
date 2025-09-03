@@ -1107,44 +1107,6 @@ function GeminiUI () {
   const inputContainerHeight = inputContainerRef.current ? inputContainerRef.current.offsetHeight : 0;
   const messageContainerHeight = viewportHeight - topBarHeight - inputContainerHeight;
 
-
-
-  const simulateSwipeUp = () => {
-    const el = topBarRef.current;
-    if (!el) return;
-
-    const touchObj = {
-      identifier: Date.now(),
-      target: el,
-      clientX: 100,
-      clientY: 200, // start Y
-    };
-
-    // Create TouchEvent (start)
-    const touchStart = new TouchEvent("touchstart", {
-      touches: [new Touch(touchObj)],
-      bubbles: true,
-      cancelable: true,
-    });
-    el.dispatchEvent(touchStart);
-
-    // Move upwards
-    const touchMove = new TouchEvent("touchmove", {
-      touches: [new Touch({ ...touchObj, clientY: 50 })], // moved up
-      bubbles: true,
-      cancelable: true,
-    });
-    el.dispatchEvent(touchMove);
-
-    // End
-    const touchEnd = new TouchEvent("touchend", {
-      touches: [],
-      bubbles: true,
-      cancelable: true,
-    });
-    el.dispatchEvent(touchEnd);
-  };
-
   return (
     <>
       <style>
@@ -1247,7 +1209,6 @@ function GeminiUI () {
       {/* Top bar for the title */}
       <div className="topBar" ref={topBarRef}>
         Simple Chat UI
-        <button onClick={simulateSwipeUp}>Swipe</button>
       </div>
 
       {/* Message container that scrolls */}
@@ -1282,6 +1243,175 @@ function GeminiUI () {
 
 
 
+
+
+function CopilotUI() {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const messageContainerRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Scroll to bottom when new messages are added
+  useEffect(() => {
+    if (messageContainerRef.current) {
+      messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  // Ensure inputContainer stays above the virtual keyboard
+  useEffect(() => {
+    const handleFocus = () => {
+      setTimeout(() => {
+        // On mobile, sometimes we need to scroll input into view
+        inputRef.current && inputRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
+      }, 300);
+    };
+
+    const textarea = inputRef.current;
+    if (textarea) {
+      textarea.addEventListener("focus", handleFocus);
+    }
+
+    return () => {
+      if (textarea) {
+        textarea.removeEventListener("focus", handleFocus);
+      }
+    };
+  }, []);
+
+  function handleSend() {
+    if (input.trim() === "") return;
+    setMessages([...messages, { text: input, id: Date.now() }]);
+    setInput("");
+  }
+
+  return (
+    <div style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      height: "100vh",
+      width: "100vw",
+      background: "#f5f5f5",
+      overflow: "hidden",
+      fontFamily: "sans-serif"
+    }}>
+      {/* TopBar */}
+      <div style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "56px",
+        background: "#1976d2",
+        color: "#fff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontWeight: "bold",
+        fontSize: "18px",
+        zIndex: 10,
+        boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
+      }}>
+        Messaging UI
+      </div>
+
+      {/* MessageContainer */}
+      <div
+        ref={messageContainerRef}
+        style={{
+          position: "absolute",
+          top: "56px",
+          bottom: "64px",
+          left: 0,
+          width: "100vw",
+          overflowY: "auto",
+          padding: "12px 8px",
+          boxSizing: "border-box"
+        }}
+      >
+        {messages.map(msg => (
+          <div
+            key={msg.id}
+            style={{
+              marginBottom: "10px",
+              alignSelf: "flex-end",
+              display: "flex",
+              justifyContent: "flex-end"
+            }}
+          >
+            <div style={{
+              background: "#1976d2",
+              color: "#fff",
+              padding: "8px 12px",
+              borderRadius: "16px",
+              maxWidth: "75vw",
+              fontSize: "16px",
+              wordBreak: "break-word"
+            }}>
+              {msg.text}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* InputContainer */}
+      <div style={{
+        position: "fixed",
+        bottom: 0,
+        left: 0,
+        width: "100vw",
+        height: "64px",
+        background: "#fff",
+        borderTop: "1px solid #eee",
+        display: "flex",
+        alignItems: "center",
+        padding: "8px",
+        boxSizing: "border-box",
+        zIndex: 11
+      }}>
+        <textarea
+          ref={inputRef}
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          rows={1}
+          style={{
+            flex: 1,
+            resize: "none",
+            fontSize: "16px",
+            padding: "8px",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            outline: "none",
+            marginRight: "8px",
+            maxHeight: "40px"
+          }}
+          placeholder="Type a message..."
+        />
+        <button
+          onClick={handleSend}
+          style={{
+            background: "#1976d2",
+            color: "#fff",
+            border: "none",
+            borderRadius: "8px",
+            padding: "0 16px",
+            height: "40px",
+            fontSize: "16px",
+            fontWeight: "bold",
+            cursor: "pointer"
+          }}
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+
+
 function Login_Add(){
   const [jsoncache, setJsoncache] = useState("");
   const [atpage, setAtpage] = useState(22);
@@ -1294,7 +1424,7 @@ function Login_Add(){
         {atpage == 111 && <ChatPage />}
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
         {atpage == 99 && <AllInOnePage />}
-        {atpage == 22 && <GeminiUI />}
+        {atpage == 22 && <CopilotUI />}
       </div>
     </>
   );
