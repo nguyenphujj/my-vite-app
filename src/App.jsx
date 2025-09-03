@@ -1069,6 +1069,180 @@ function MessagingUI() {
 
 
 
+
+function GeminiUI () {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+  const messagesEndRef = useRef(null);
+  const topBarRef = useRef(null);
+  const inputContainerRef = useRef(null);
+
+  // Use a resize event listener to get the true viewport height,
+  // which is crucial for handling the mobile virtual keyboard.
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportHeight(window.innerHeight);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Auto-scroll to the bottom whenever a new message is added.
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Handle the "Send" button click.
+  const handleSend = () => {
+    if (input.trim()) {
+      setMessages([...messages, { id: Date.now(), text: input, from: 'user' }]);
+      setInput('');
+    }
+  };
+
+  // Calculate the height of the message container dynamically
+  // to fit between the top and bottom bars.
+  const topBarHeight = topBarRef.current ? topBarRef.current.offsetHeight : 0;
+  const inputContainerHeight = inputContainerRef.current ? inputContainerRef.current.offsetHeight : 0;
+  const messageContainerHeight = viewportHeight - topBarHeight - inputContainerHeight;
+
+  return (
+    <>
+      <style>
+        {`
+          body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f0f2f5;
+          }
+
+          .topBar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 56px;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+          }
+
+          .messageContainer {
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+          }
+          
+          .message {
+            background-color: #e0e0e0;
+            padding: 10px 15px;
+            border-radius: 20px;
+            margin: 5px 0;
+            max-width: 75%;
+            word-wrap: break-word;
+          }
+
+          .message.user {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+          }
+          
+          .message.other {
+            background-color: #e0e0e0;
+            color: #333;
+            align-self: flex-start;
+          }
+
+          .inputContainer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            padding: 10px;
+            background-color: white;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            align-items: center;
+            z-index: 1000;
+          }
+          
+          .inputContainer textarea {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            margin-right: 10px;
+            resize: none;
+            max-height: 100px;
+          }
+          
+          .inputContainer button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+          }
+
+          .inputContainer button:hover {
+            background-color: #0056b3;
+          }
+        `}
+      </style>
+
+      {/* Top bar for the title */}
+      <div className="topBar" ref={topBarRef}>
+        Simple Chat UI
+      </div>
+
+      {/* Message container that scrolls */}
+      <div 
+        className="messageContainer" 
+        style={{ height: `${messageContainerHeight}px`, paddingTop: `${topBarHeight}px` }}
+      >
+        {messages.map((msg) => (
+          <div key={msg.id} className={`message ${msg.from}`}>
+            {msg.text}
+          </div>
+        ))}
+        {/* Empty div to auto-scroll to */}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input container with a textarea and send button */}
+      <div className="inputContainer" ref={inputContainerRef}>
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type a message..."
+          rows="1"
+        />
+        <button onClick={handleSend}>
+          &gt;
+        </button>
+      </div>
+    </>
+  );
+};
+
+
+
 function Login_Add(){
   const [jsoncache, setJsoncache] = useState("");
   const [atpage, setAtpage] = useState(22);
@@ -1081,7 +1255,7 @@ function Login_Add(){
         {atpage == 111 && <ChatPage />}
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
         {atpage == 99 && <AllInOnePage />}
-        {atpage == 22 && <MessagingUI />}
+        {atpage == 22 && <GeminiUI />}
       </div>
     </>
   );
