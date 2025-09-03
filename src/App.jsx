@@ -1107,6 +1107,44 @@ function GeminiUI () {
   const inputContainerHeight = inputContainerRef.current ? inputContainerRef.current.offsetHeight : 0;
   const messageContainerHeight = viewportHeight - topBarHeight - inputContainerHeight;
 
+
+
+  const simulateSwipeUp = () => {
+    const el = topBarRef.current;
+    if (!el) return;
+
+    const touchObj = {
+      identifier: Date.now(),
+      target: el,
+      clientX: 100,
+      clientY: 200, // start Y
+    };
+
+    // Create TouchEvent (start)
+    const touchStart = new TouchEvent("touchstart", {
+      touches: [new Touch(touchObj)],
+      bubbles: true,
+      cancelable: true,
+    });
+    el.dispatchEvent(touchStart);
+
+    // Move upwards
+    const touchMove = new TouchEvent("touchmove", {
+      touches: [new Touch({ ...touchObj, clientY: 50 })], // moved up
+      bubbles: true,
+      cancelable: true,
+    });
+    el.dispatchEvent(touchMove);
+
+    // End
+    const touchEnd = new TouchEvent("touchend", {
+      touches: [],
+      bubbles: true,
+      cancelable: true,
+    });
+    el.dispatchEvent(touchEnd);
+  };
+
   return (
     <>
       <style>
@@ -1209,6 +1247,7 @@ function GeminiUI () {
       {/* Top bar for the title */}
       <div className="topBar" ref={topBarRef}>
         Simple Chat UI
+        <button onClick={simulateSwipeUp}>Swipe</button>
       </div>
 
       {/* Message container that scrolls */}
