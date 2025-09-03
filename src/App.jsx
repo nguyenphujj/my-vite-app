@@ -1412,6 +1412,213 @@ function CopilotUI() {
 
 
 
+
+
+function GeminiProUI () {
+  // State for messages and the current input value
+  const [messages, setMessages] = useState([
+    { id: 1, text: "Hey there!", sender: 'other' },
+    { id: 2, text: "Hi! How are you?", sender: 'user' },
+    { id: 3, text: "I'm good, thanks! This is a demo of a mobile messaging UI.", sender: 'other' },
+    { id: 4, text: "Looks great! The input bar stays at the bottom, even with the keyboard.", sender: 'user' },
+  ]);
+  const [inputValue, setInputValue] = useState('');
+  
+  // Ref to the messages container for auto-scrolling
+  const messagesEndRef = useRef(null);
+  const textareaRef = useRef(null);
+
+  // Function to scroll to the bottom of the messages
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Scroll to bottom whenever messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  // Function to handle sending a new message
+  const handleSendMessage = () => {
+    if (inputValue.trim()) {
+      const newMessage = {
+        id: Date.now(),
+        text: inputValue,
+        sender: 'user',
+      };
+      setMessages([...messages, newMessage]);
+      setInputValue('');
+      // Reset textarea height after sending
+      if(textareaRef.current) {
+        textareaRef.current.style.height = '24px';
+      }
+    }
+  };
+    
+  // Handle 'Enter' key press for sending message
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // Prevents adding a new line
+      handleSendMessage();
+    }
+  };
+
+  // Auto-resize textarea height based on content
+  const handleTextareaChange = (e) => {
+      setInputValue(e.target.value);
+      e.target.style.height = 'auto'; // Reset height
+      e.target.style.height = `${e.target.scrollHeight}px`; // Set to scroll height
+  };
+
+  // --- Inline Styles ---
+
+  const styles = {
+    container: {
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+      height: '100vh',
+      width: '100vw',
+      display: 'flex',
+      flexDirection: 'column',
+      backgroundColor: '#f0f2f5',
+      margin: 0,
+      padding: 0,
+      overflow: 'hidden',
+    },
+    topBar: {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: '60px',
+      backgroundColor: '#ffffff',
+      borderBottom: '1px solid #dddddd',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 100,
+      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+    },
+    topBarTitle: {
+      fontSize: '18px',
+      fontWeight: '600',
+      color: '#333333',
+    },
+    messageContainer: {
+      flex: 1,
+      padding: '70px 10px 80px 10px',
+      overflowY: 'auto',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '10px',
+    },
+    messageBubble: {
+      maxWidth: '75%',
+      padding: '10px 15px',
+      borderRadius: '20px',
+      lineHeight: '1.4',
+      wordWrap: 'break-word',
+    },
+    userMessage: {
+      alignSelf: 'flex-end',
+      backgroundColor: '#007aff',
+      color: 'white',
+    },
+    otherMessage: {
+      alignSelf: 'flex-start',
+      backgroundColor: '#ffffff',
+      color: '#333333',
+      border: '1px solid #e5e5ea',
+    },
+    inputContainer: {
+      position: 'fixed',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      padding: '10px',
+      backgroundColor: '#ffffff',
+      borderTop: '1px solid #dddddd',
+      display: 'flex',
+      alignItems: 'flex-end', // Aligns items to the bottom
+      gap: '10px',
+      zIndex: 100,
+    },
+    textarea: {
+      flex: 1,
+      resize: 'none',
+      border: '1px solid #ccc',
+      borderRadius: '20px',
+      padding: '10px 15px',
+      minHeight: '24px', // Corresponds to padding + lineHeight
+      maxHeight: '120px',
+      boxSizing: 'border-box',
+      fontFamily: 'inherit',
+      fontSize: '16px',
+      lineHeight: '1.5',
+      outline: 'none',
+      overflowY: 'auto',
+    },
+    sendButton: {
+      padding: '10px 15px',
+      backgroundColor: '#007aff',
+      color: 'white',
+      border: 'none',
+      borderRadius: '20px',
+      cursor: 'pointer',
+      fontSize: '16px',
+      fontWeight: '600',
+      outline: 'none',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+  };
+
+  return (
+    <div style={styles.container}>
+      {/* Top Bar */}
+      <div style={styles.topBar}>
+        <div style={styles.topBarTitle}>John Doe</div>
+      </div>
+
+      {/* Message Container */}
+      <div style={styles.messageContainer}>
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            style={{
+              ...styles.messageBubble,
+              ...(msg.sender === 'user' ? styles.userMessage : styles.otherMessage),
+            }}
+          >
+            {msg.text}
+          </div>
+        ))}
+        {/* Empty div to which we scroll */}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input Container */}
+      <div style={styles.inputContainer}>
+        <textarea
+          ref={textareaRef}
+          style={styles.textarea}
+          value={inputValue}
+          onChange={handleTextareaChange}
+          onKeyPress={handleKeyPress}
+          placeholder="Type a message..."
+          rows="1"
+        />
+        <button style={styles.sendButton} onClick={handleSendMessage}>
+          Send
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+
+
 function Login_Add(){
   const [jsoncache, setJsoncache] = useState("");
   const [atpage, setAtpage] = useState(22);
@@ -1424,7 +1631,7 @@ function Login_Add(){
         {atpage == 111 && <ChatPage />}
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
         {atpage == 99 && <AllInOnePage />}
-        {atpage == 22 && <CopilotUI />}
+        {atpage == 22 && <GeminiProUI />}
       </div>
     </>
   );
