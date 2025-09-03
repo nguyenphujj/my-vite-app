@@ -1929,7 +1929,7 @@ function Login_Add(){
         {atpage == 111 && <ChatPage />}
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
         {atpage == 99 && <AllInOnePage />}
-        {atpage == 22 && <GPT5miniUI />}
+        {atpage == 22 && <GeminiProUI />}
       </div>
     </>
   );
