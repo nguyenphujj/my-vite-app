@@ -1550,7 +1550,6 @@ function GeminiProUI () {
       padding: '10px 15px',
       minHeight: '24px', // Corresponds to padding + lineHeight
       maxHeight: '120px',
-      boxSizing: 'border-box',
       fontFamily: 'inherit',
       fontSize: '16px',
       lineHeight: '1.5',
@@ -1604,9 +1603,9 @@ function GeminiProUI () {
           style={styles.textarea}
           value={inputValue}
           onChange={handleTextareaChange}
-          onKeyPress={handleKeyPress}
+          
           placeholder="Type a message..."
-          rows="1"
+          
         />
         <button style={styles.sendButton} onClick={handleSendMessage}>
           Send
