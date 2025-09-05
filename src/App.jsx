@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { InlineMath, BlockMath } from 'react-katex';
 import 'katex/dist/katex.min.css';
 
-
+import { motion, AnimatePresence } from "framer-motion";
 
 
 
@@ -1616,305 +1616,256 @@ function GeminiProUI () {
 };
 
 
+function MessageSaver() {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
 
-
-
-function GPT5miniUI() {
-  const TOP_BAR_HEIGHT = 56; // px
-  const [messages, setMessages] = useState([
-    { id: 1, text: 'Hello — this is your message list.' },
-    { id: 2, text: 'Tap the input below and try the keyboard on mobile.' }
-  ]);
-  const [text, setText] = useState('');
-  const [bottomOffset, setBottomOffset] = useState(0); // space taken by virtual keyboard
-  const [inputHeight, setInputHeight] = useState(64); // initial input container height estimate
-  const messageContainerRef = useRef(null);
-  const inputContainerRef = useRef(null);
-  const textareaRef = useRef(null);
-  const messagesEndRef = useRef(null);
-
-  // Scroll to bottom helper
-  const scrollToBottom = (behavior = 'smooth') => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior });
-    }
+  const handleSave = () => {
+    if (input.trim() === "") return;
+    setMessages([...messages, input]);
+    setInput("");
   };
 
-  // Auto-resize the textarea and update measured input container height
-  const resizeTextareaAndMeasure = () => {
+  return (
+    <div className="p-6 max-w-xl mx-auto">
+      <textarea
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        rows={5}
+        className="w-full p-3 border rounded-2xl shadow-sm focus:outline-none focus:ring"
+        placeholder="Type your message..."
+      />
+      <button
+        onClick={handleSave}
+        className="mt-3 px-4 py-2 rounded-2xl shadow bg-blue-500 text-white hover:bg-blue-600"
+      >
+        Save Message
+      </button>
+
+      {messages.length > 0 && (
+        <div className="mt-6 p-4 border rounded-2xl shadow-sm bg-gray-50 whitespace-pre-line">
+          {messages[messages.length - 1]}
+        </div>
+      )}
+
+      <div>
+        {messages.map((item, idx) => (
+          <div key={idx}>
+            <strong style={{ whiteSpace: "pre-line" }}>{item}</strong>
+          </div>
+        ))}
+      </div>
+
+      <pre className="mt-4 p-3 text-sm bg-gray-100 rounded-2xl overflow-x-auto">
+        {JSON.stringify(messages, null, 2)}
+      </pre>
+    </div>
+  );
+}
+
+function GPTreasoningUI() {
+  const [messages, setMessages] = useState([
+    { id: 1, text: "Hey! Welcome to the chat.", who: "them" },
+    { id: 2, text: "Hi — testing keyboard-aware input 😄", who: "me" },
+  ]);
+  const [text, setText] = useState("");
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [inputHeight, setInputHeight] = useState(48);
+
+  const messagesRef = useRef(null);
+  const textareaRef = useRef(null);
+  const initialInnerHeightRef = useRef(typeof window !== "undefined" ? window.innerHeight : 0);
+
+  // Auto-resize textarea and keep track of its height
+  useEffect(() => {
     const ta = textareaRef.current;
     if (!ta) return;
-    // Reset height to allow shrink
-    ta.style.height = 'auto';
-    // Limit max height (e.g., 120px)
-    const maxHeight = 120;
-    const newHeight = Math.min(ta.scrollHeight, maxHeight);
-    ta.style.height = newHeight + 'px';
+    const resize = () => {
+      ta.style.height = "auto";
+      // clamp max height to something reasonable for mobile
+      const newHeight = Math.min(ta.scrollHeight, 160);
+      ta.style.height = `${newHeight}px`;
+      setInputHeight(newHeight + 16); // padding + buffer
+    };
+    resize();
+    ta.addEventListener("input", resize);
+    return () => ta.removeEventListener("input", resize);
+  }, []);
 
-    // Measure the whole input container (padding, button, etc.)
-    requestAnimationFrame(() => {
-      const container = inputContainerRef.current;
-      if (container) {
-        setInputHeight(container.getBoundingClientRect().height);
-      }
-    });
-  };
-
-  // Handle virtual keyboard via VisualViewport API and fallbacks
+  // Keyboard awareness using visualViewport with a fallback to window.innerHeight differences
   useEffect(() => {
-    const vv = window.visualViewport;
-
-    function updateOffsets() {
-      let keyboardHeight = 0;
+    const onViewport = () => {
+      // visualViewport gives better info on mobile browsers
+      const vv = window.visualViewport;
       if (vv) {
-        // On many mobile browsers: visualViewport.height + visualViewport.offsetTop <= layout viewport
-        // keyboard height ~ window.innerHeight - visualViewport.height - visualViewport.offsetTop
-        keyboardHeight = Math.max(0, window.innerHeight - (vv.height + (vv.offsetTop || 0)));
+        // amount the keyboard covers = difference between layout viewport and visual viewport
+        const heightDiff = Math.max(0, window.innerHeight - vv.height - (vv.offsetTop || 0));
+        setKeyboardHeight(heightDiff);
       } else {
-        // Fallback: estimate from window.innerHeight change
-        keyboardHeight = Math.max(0, window.innerHeight - document.documentElement.clientHeight);
+        // fallback: compare to initial innerHeight
+        const diff = Math.max(0, initialInnerHeightRef.current - window.innerHeight);
+        setKeyboardHeight(diff);
       }
-      setBottomOffset(keyboardHeight);
-      // After bottom offset changes, re-measure input container height (it might be repositioned)
-      requestAnimationFrame(() => {
-        const container = inputContainerRef.current;
-        if (container) {
-          setInputHeight(container.getBoundingClientRect().height);
-        }
-      });
+    };
+
+    // initial call
+    onViewport();
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", onViewport);
+      window.visualViewport.addEventListener("scroll", onViewport);
     }
 
-    // VisualViewport events
-    if (vv && vv.addEventListener) {
-      vv.addEventListener('resize', updateOffsets);
-      vv.addEventListener('scroll', updateOffsets);
-    } else {
-      window.addEventListener('resize', updateOffsets);
-    }
+    window.addEventListener("resize", onViewport);
 
-    // Focusin/out can help on platforms that don't fire visualViewport
-    function onFocusIn() {
-      // Slight delay to allow the keyboard to appear and layout to settle
-      setTimeout(updateOffsets, 50);
+    // when nothing else, try focusing/blur events on textarea as heuristic
+    const ta = textareaRef.current;
+    if (ta) {
+      ta.addEventListener("focus", onViewport);
+      ta.addEventListener("blur", onViewport);
     }
-    function onFocusOut() {
-      setTimeout(updateOffsets, 50);
-    }
-    window.addEventListener('focusin', onFocusIn);
-    window.addEventListener('focusout', onFocusOut);
-
-    // Initial measure
-    resizeTextareaAndMeasure();
-    updateOffsets();
 
     return () => {
-      if (vv && vv.removeEventListener) {
-        vv.removeEventListener('resize', updateOffsets);
-        vv.removeEventListener('scroll', updateOffsets);
-      } else {
-        window.removeEventListener('resize', updateOffsets);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener("resize", onViewport);
+        window.visualViewport.removeEventListener("scroll", onViewport);
       }
-      window.removeEventListener('focusin', onFocusIn);
-      window.removeEventListener('focusout', onFocusOut);
+      window.removeEventListener("resize", onViewport);
+      if (ta) {
+        ta.removeEventListener("focus", onViewport);
+        ta.removeEventListener("blur", onViewport);
+      }
     };
   }, []);
 
-  // Keep message container scrolled to bottom on new messages
+  // Scroll to bottom when messages or keyboardHeight change
   useEffect(() => {
-    scrollToBottom('smooth');
-  }, [messages]);
-
-  // When input height or bottom offset change, adjust message container scroll if needed
-  useEffect(() => {
-    const mc = messageContainerRef.current;
-    if (!mc) return;
-    // Keep view pinned to bottom when keyboard shows; small delay to allow resizing
-    setTimeout(() => {
-      scrollToBottom('auto');
+    const el = messagesRef.current;
+    if (!el) return;
+    // small timeout to allow layout to settle on mobile
+    const id = setTimeout(() => {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
     }, 50);
-  }, [inputHeight, bottomOffset]);
+    return () => clearTimeout(id);
+  }, [messages, keyboardHeight]);
 
-  // Send message
-  const sendMessage = () => {
+  const send = () => {
     if (!text.trim()) return;
-    setMessages(prev => [...prev, { id: Date.now(), text: text.trim() }]);
-    setText('');
-    // Resize textarea back to default
-    const ta = textareaRef.current;
-    if (ta) {
-      ta.style.height = 'auto';
+    setMessages((m) => [...m, { id: Date.now(), text: text.trim(), who: "me" }]);
+    setText("");
+    // reset textarea height after sending
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
     }
-    // After clearing, measure input container again
-    setTimeout(resizeTextareaAndMeasure, 50);
   };
 
-  // Handle textarea input for auto-grow and state update
-  const onTextareaInput = (e) => {
-    setText(e.target.value);
-    resizeTextareaAndMeasure();
-  };
-
-  // Layout styles (inline style objects)
-  const rootStyle = {
-    height: '100%',
-    display: 'block',
-    position: 'relative',
-    WebkitOverflowScrolling: 'touch'
-  };
-
-  const topBarStyle = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: TOP_BAR_HEIGHT,
-    background: '#1f6feb',
-    color: 'white',
-    display: 'flex',
-    alignItems: 'center',
-    paddingLeft: 16,
-    paddingRight: 16,
-    boxSizing: 'border-box',
-    zIndex: 20
-  };
-
-  const messageContainerStyle = {
-    position: 'fixed',
-    top: TOP_BAR_HEIGHT,
-    left: 0,
-    right: 0,
-    // bottom needs to place it above inputContainer which itself is offset by bottomOffset
-    bottom: (inputHeight + bottomOffset) + 'px',
-    padding: '12px 12px',
-    overflowY: 'auto',
-    WebkitOverflowScrolling: 'touch',
-    boxSizing: 'border-box'
-  };
-
+  // computed styles
   const inputContainerStyle = {
-    position: 'fixed',
-    left: 0,
-    right: 0,
-    // Sit above keyboard (bottomOffset). Add small safe area padding using CSS env if supported.
-    bottom: bottomOffset + 'px',
-    padding: '8px',
-    paddingBottom: `calc(${bottomOffset}px + env(safe-area-inset-bottom, 0px))`,
-    background: 'linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95))',
-    borderTop: '1px solid rgba(0,0,0,0.08)',
-    boxSizing: 'border-box',
-    zIndex: 30
+    bottom: `${keyboardHeight}px`,
+    // make sure system safe-area inset is respected (iOS notch / home indicator)
+    paddingBottom: "env(safe-area-inset-bottom)",
   };
 
-  const inputRowStyle = {
-    display: 'flex',
-    gap: 8,
-    alignItems: 'flex-end'
-  };
-
-  const textareaStyle = {
-    flex: 1,
-    minHeight: 36,
-    maxHeight: 120,
-    resize: 'none',
-    borderRadius: 8,
-    padding: '8px 10px',
-    fontSize: 16,
-    lineHeight: '20px',
-    border: '1px solid rgba(0,0,0,0.12)',
-    boxSizing: 'border-box',
-    outline: 'none',
-    background: 'white'
-  };
-
-  const sendButtonStyle = {
-    padding: '10px 14px',
-    background: '#0b84ff',
-    color: 'white',
-    border: 'none',
-    borderRadius: 8,
-    fontSize: 15,
-    fontWeight: 600,
-    cursor: 'pointer',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center'
-  };
-
-  const messageBubbleStyle = (isOwn) => ({
-    display: 'inline-block',
-    padding: '10px 12px',
-    marginBottom: 8,
-    maxWidth: '78%',
-    borderRadius: 16,
-    background: isOwn ? '#0b84ff' : '#e6e9ef',
-    color: isOwn ? 'white' : '#111827',
-    boxShadow: '0 1px 0 rgba(0,0,0,0.02)'
-  });
+  const messagesPaddingBottom = inputHeight + 24; // 24px extra buffer
 
   return (
-    <div style={rootStyle}>
-      <div style={topBarStyle}>
-        <div style={{ fontSize: 18, fontWeight: 600 }}>Messages</div>
-      </div>
-
-      <div
-        ref={messageContainerRef}
-        style={messageContainerStyle}
-        onClick={() => {
-          // Tapping message area should blur input to hide keyboard if desired
-          if (textareaRef.current) textareaRef.current.blur();
-        }}
+    <div className="h-screen w-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 relative overflow-hidden">
+      {/* Top bar - fixed, transparent, blurred, elevated */}
+      <header
+        className="fixed inset-x-0 top-0 z-50 pointer-events-auto"
+        style={{ WebkitBackdropFilter: "blur(8px)", backdropFilter: "blur(8px)" }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          {messages.map((m) => (
-            <div key={m.id} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <div style={messageBubbleStyle(true)}>
-                <div style={{ whiteSpace: 'pre-wrap' }}>{m.text}</div>
+        <div className="backdrop-blur-sm bg-white/30 dark:bg-black/30 border-b border-white/10">
+          <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-pink-400 flex items-center justify-center text-white font-bold">C</div>
+            <div className="flex-1">
+              <div className="text-sm font-semibold">Chat with Clara</div>
+              <div className="text-xs text-gray-600 dark:text-gray-300">Online</div>
+            </div>
+            <div className="text-sm opacity-80">⋯</div>
+          </div>
+        </div>
+      </header>
+
+      {/* Messages container */}
+      <main
+        ref={messagesRef}
+        className="absolute inset-x-0 top-16 bottom-0 overflow-y-auto px-4 pb-6 z-10"
+        style={{ paddingBottom: `${messagesPaddingBottom}px` }}
+      >
+        <div className="max-w-2xl mx-auto mt-3 space-y-3">
+          <AnimatePresence initial={false} mode="popLayout">
+            {messages.map((m) => (
+              <motion.div
+                key={m.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ type: "spring", stiffness: 600, damping: 30 }}
+                className={`flex ${m.who === "me" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[80%] px-3 py-2 rounded-2xl shadow-sm ${
+                    m.who === "me"
+                      ? "bg-indigo-600 text-white rounded-br-none"
+                      : "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-none"
+                  }`}
+                >
+                  <div className="whitespace-pre-wrap break-words">{m.text}</div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </main>
+
+      {/* Input container - fixed to bottom, moves up with keyboardHeight */}
+      <div
+        className="fixed left-0 right-0 z-40 px-4 pt-3"
+        style={inputContainerStyle}
+      >
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-end gap-3">
+            <div className="flex-1">
+              <div className="relative">
+                <textarea
+                  ref={textareaRef}
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  rows={1}
+                  placeholder="Type a message..."
+                  className="w-full resize-none rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 pr-12 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 transition-shadow"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      send();
+                    }
+                  }}
+                />
+                {/* small send hint when typing */}
+                <div className="absolute right-3 bottom-3 text-xs text-gray-400">↵ send</div>
               </div>
             </div>
-          ))}
-        </div>
-        <div ref={messagesEndRef} />
-      </div>
 
-      <div
-        ref={inputContainerRef}
-        style={inputContainerStyle}
-      // Prevent the input container from being covered by safe area notch on iOS
-      >
-        <div style={inputRowStyle}>
-          <textarea
-            ref={textareaRef}
-            value={text}
-            onChange={onTextareaInput}
-            placeholder="Type a message..."
-            rows={1}
-            style={textareaStyle}
-            onKeyDown={(e) => {
-              // Send on Ctrl/Cmd+Enter
-              if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                e.preventDefault();
-                sendMessage();
-              }
-            }}
-          />
-          <button
-            style={sendButtonStyle}
-            onClick={sendMessage}
-            aria-label="Send message"
-          >
-            Send
-          </button>
+            <button
+              onClick={send}
+              aria-label="Send"
+              className="flex items-center justify-center w-12 h-12 rounded-full bg-indigo-600 shadow-lg text-white disabled:opacity-50"
+              disabled={!text.trim()}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2.94 2.5a1 1 0 011.06-.21l13 6a1 1 0 01.01 1.82l-4.5 2.11-2.11 4.5a1 1 0 01-1.82.01l-6-13a1 1 0 01.21-1.06z" />
+              </svg>
+            </button>
+          </div>
+
+          {/* bottom safe-area spacer */}
+          <div style={{ height: "env(safe-area-inset-bottom)" }} />
         </div>
       </div>
     </div>
   );
 }
-
-
-
-
-
 
 
 function Login_Add(){
@@ -1929,7 +1880,7 @@ function Login_Add(){
         {atpage == 111 && <ChatPage />}
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
         {atpage == 99 && <AllInOnePage />}
-        {atpage == 22 && <GeminiProUI />}
+        {atpage == 22 && <GPTreasoningUI />}
       </div>
     </>
   );
