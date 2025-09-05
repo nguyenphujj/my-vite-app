@@ -1862,6 +1862,200 @@ function GPTreasoningUI() {
 }
 
 
+
+
+
+
+
+
+const ArrowUpIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="m5 12 7-7 7 7" />
+    <path d="M12 19V5" />
+  </svg>
+);
+
+const ArrowLeftIcon = () => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="24" 
+        height="24" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+    >
+        <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
+    </svg>
+);
+
+const TopBar = () => {
+  return (
+    <header className="fixed top-0 left-0 right-0 z-20">
+      <div className="absolute top-0 left-0 w-full h-full bg-slate-900/70 backdrop-blur-lg"></div>
+      <div className="relative z-10 flex items-center justify-between p-4 text-white">
+        <button className="p-2 -ml-2">
+            <ArrowLeftIcon />
+        </button>
+        <div className="flex flex-col items-center">
+          <h1 className="text-lg font-bold">Jane Doe</h1>
+          <p className="text-sm text-gray-300">online</p>
+        </div>
+        <div className="w-10 h-10 flex-shrink-0">
+          <img
+            src="https://placehold.co/100x100/7e22ce/ffffff?text=JD"
+            alt="Jane Doe's Avatar"
+            className="w-full h-full rounded-full object-cover border-2 border-white/50"
+          />
+        </div>
+      </div>
+    </header>
+  );
+};
+
+const MessageBubble = ({ message }) => {
+  const { text, isSent } = message;
+  const bubbleClasses = isSent
+    ? 'bg-blue-600 text-white self-end rounded-l-2xl rounded-tr-2xl'
+    : 'bg-slate-700 text-white self-start rounded-r-2xl rounded-tl-2xl';
+  
+  return (
+    <div className={`w-full flex ${isSent ? 'justify-end' : 'justify-start'}`}>
+      <div className={`max-w-[75%] md:max-w-[60%] p-3 px-4 shadow-md ${bubbleClasses}`}>
+        <p className="text-base">{text}</p>
+      </div>
+    </div>
+  );
+};
+
+const MessageContainer = ({ messages }) => {
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]); // Dependency array ensures this runs when messages change
+
+  return (
+    // The pt-24 and pb-28 values create space so content isn't hidden by the fixed TopBar and InputContainer
+    <main className="flex-1 overflow-y-auto pt-24 pb-28 px-4">
+      <div className="flex flex-col space-y-4">
+        {messages.map((msg) => (
+          <MessageBubble key={msg.id} message={msg} />
+        ))}
+        {/* This empty div is the target for auto-scrolling */}
+        <div ref={messagesEndRef} />
+      </div>
+    </main>
+  );
+};
+
+const InputContainer = ({ onSendMessage }) => {
+  const [text, setText] = useState('');
+  const textareaRef = useRef(null);
+
+  // Auto-resize the textarea height based on content
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto'; // Reset height
+      const scrollHeight = textarea.scrollHeight;
+      textarea.style.height = `${scrollHeight}px`; // Set to content height
+    }
+  }, [text]);
+
+
+  const handleSend = () => {
+    if (text.trim()) {
+      onSendMessage(text);
+      setText('');
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // Prevents new line on Enter
+      handleSend();
+    }
+  };
+
+  return (
+    <footer className="fixed bottom-0 left-0 right-0 z-20">
+      {/* Blur effect */}
+      <div className="absolute bottom-0 left-0 w-full h-full bg-slate-900/70 backdrop-blur-lg"></div>
+      
+      {/* Content */}
+      <div className="relative z-10 p-3 flex items-end">
+        <textarea
+          ref={textareaRef}
+          className="flex-1 bg-slate-800 text-white rounded-2xl px-4 py-2.5 resize-none border-2 border-transparent focus:outline-none focus:border-blue-500 transition-all duration-200"
+          placeholder="Type a message..."
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyPress={handleKeyPress}
+          rows="1"
+          style={{ maxHeight: '120px' }} // Prevents infinite growth
+        ></textarea>
+        <button 
+          onClick={handleSend}
+          className="ml-3 bg-blue-600 text-white rounded-full p-3 flex-shrink-0 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all disabled:bg-slate-600 disabled:cursor-not-allowed"
+          disabled={!text.trim()}
+          aria-label="Send message"
+        >
+          <ArrowUpIcon />
+        </button>
+      </div>
+    </footer>
+  );
+};
+
+function Geminipro2UI() {
+  const [messages, setMessages] = useState([
+    { id: 1, text: 'Hey, how is it going?', isSent: false },
+    { id: 2, text: 'Hi! I am doing great. Thanks for asking!', isSent: true },
+    { id: 3, text: 'I am working on a new React project for a messaging UI.', isSent: true },
+    { id: 4, text: 'Wow, that sounds amazing! Can you show me?', isSent: false },
+    { id: 5, text: 'Sure, here is a preview!', isSent: true },
+  ]);
+
+  const handleSendMessage = (text) => {
+    const newMessage = {
+      id: messages.length + 1,
+      text,
+      isSent: true,
+    };
+    setMessages([...messages, newMessage]);
+  };
+
+  return (
+    <div className="bg-slate-900 h-screen w-screen flex flex-col font-sans antialiased">
+      <TopBar />
+      <MessageContainer messages={messages} />
+      <InputContainer onSendMessage={handleSendMessage} />
+    </div>
+  );
+}
+
+
+
+
+
+
 function Login_Add(){
   const [jsoncache, setJsoncache] = useState("");
   const [atpage, setAtpage] = useState(22);
@@ -1874,7 +2068,7 @@ function Login_Add(){
         {atpage == 111 && <ChatPage />}
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
         {atpage == 99 && <AllInOnePage />}
-        {atpage == 22 && <GPTreasoningUI />}
+        {atpage == 22 && <Geminipro2UI />}
       </div>
     </>
   );
