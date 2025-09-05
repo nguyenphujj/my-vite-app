@@ -1829,18 +1829,12 @@ function GPTreasoningUI() {
             <div className="flex-1">
               <div className="relative">
                 <textarea
-                  ref={textareaRef}
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   rows={1}
                   placeholder="Type a message..."
                   className="w-full resize-none rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 pr-12 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 transition-shadow"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      send();
-                    }
-                  }}
+                  
                 />
                 {/* small send hint when typing */}
                 <div className="absolute right-3 bottom-3 text-xs text-gray-400">↵ send</div>
