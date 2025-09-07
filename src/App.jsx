@@ -2053,9 +2053,13 @@ function Geminipro2UI() {
 
 
 
-function CalculationViaBackend({ token }) {
+function CalculationViaBackend() {
   const [expr, setExpr] = useState('');
   const [result, setResult] = useState('');
+  const API_URL =
+    window.location.hostname === "localhost"
+      ? "http://localhost:5001"
+      : "https://my-express-backend-gyj9.onrender.com";
   const handleSubmit = async (haha) => {
     setResult('');
     if (!haha.trim()) {
@@ -2063,11 +2067,11 @@ function CalculationViaBackend({ token }) {
       return;
     }
     try {
-      const res = await fetch('http://localhost:5001/calculate', {
+      const res = await fetch(`${API_URL}/calculate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer`
         },
         body: JSON.stringify({ expr: haha }),
       });
@@ -2081,9 +2085,6 @@ function CalculationViaBackend({ token }) {
     const current = e.target.value
     setExpr(current)
     handleSubmit(current)
-
-
-
   }
   return (
     <>
@@ -2093,7 +2094,7 @@ function CalculationViaBackend({ token }) {
         onChange={handleChange}
         placeholder="e.g. 2+3*4"
       />
-      <button onClick={handleSubmit}>submit math</button>
+      <button onClick={() => handleSubmit('2+1')}>submit math</button>
       <div>{result}</div>
     </>
   );
