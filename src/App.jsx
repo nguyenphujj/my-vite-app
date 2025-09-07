@@ -2053,7 +2053,7 @@ function Geminipro2UI() {
 
 
 
-function CalculationViaBackend() {
+function CalculationViaBackend({ token }) {
   const [expr, setExpr] = useState('');
   const [result, setResult] = useState('');
   const API_URL =
@@ -2061,7 +2061,6 @@ function CalculationViaBackend() {
       ? "http://localhost:5001"
       : "https://my-express-backend-gyj9.onrender.com";
   const handleSubmit = async (haha) => {
-    setResult('');
     if (!haha.trim()) {
       setResult('Please enter an expression');
       return;
@@ -2071,7 +2070,7 @@ function CalculationViaBackend() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ expr: haha }),
       });
