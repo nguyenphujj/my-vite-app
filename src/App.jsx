@@ -1928,7 +1928,7 @@ const TopBar = () => {
 const MessageBubble = ({ message }) => {
   const { text, isSent } = message;
   const bubbleClasses = isSent
-    ? 'bg-blue-600 text-white self-end rounded-l-2xl rounded-tr-2xl'
+    ? 'bg-blue-100  self-end rounded-l-2xl rounded-tr-2xl'
     : 'bg-slate-700 text-white self-start rounded-r-2xl rounded-tl-2xl';
   
   return (
@@ -1954,7 +1954,7 @@ const MessageContainer = ({ messages }) => {
   return (
     // The pt-24 and pb-28 values create space so content isn't hidden by the fixed TopBar and InputContainer
     <main className="flex-1 overflow-y-auto pt-24 pb-28 px-4">
-      <div className="flex flex-col space-y-4">
+      <div className="flex flex-col space-y-4 whitespace-pre-line">
         {messages.map((msg) => (
           <MessageBubble key={msg.id} message={msg} />
         ))}
@@ -1995,26 +1995,24 @@ const InputContainer = ({ onSendMessage }) => {
   };
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-20">
+    <footer className="fixed bottom-0 left-0 right-0 z-20 bg-blue-50">
       {/* Blur effect */}
-      <div className="absolute bottom-0 left-0 w-full h-full bg-slate-900/70 backdrop-blur-lg"></div>
+      <div className="absolute bottom-0 left-0 w-full h-full  "></div>
       
       {/* Content */}
       <div className="relative z-10 p-3 flex items-end">
         <textarea
           ref={textareaRef}
-          className="flex-1 bg-slate-800 text-white rounded-2xl px-4 py-2.5 resize-none border-2 border-transparent focus:outline-none focus:border-blue-500 transition-all duration-200"
+          className="flex-1 bg-slate-800  rounded-2xl px-4 py-2.5 resize-none border-2 border-transparent focus:outline-none focus:border-blue-500 transition-all duration-200"
           placeholder="Type a message..."
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onKeyPress={handleKeyPress}
-          rows="1"
-          style={{ maxHeight: '120px' }} // Prevents infinite growth
+          style={{ maxHeight: '120px', background: 'lightgrey' }} // Prevents infinite growth
         ></textarea>
         <button 
           onClick={handleSend}
-          className="ml-3 bg-blue-600 text-white rounded-full p-3 flex-shrink-0 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all disabled:bg-slate-600 disabled:cursor-not-allowed"
-          disabled={!text.trim()}
+          className="ml-3  text-white rounded-full p-3 flex-shrink-0 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all disabled:bg-slate-600 disabled:cursor-not-allowed"
+          style={{  background: 'lightgrey' }}
           aria-label="Send message"
         >
           <ArrowUpIcon />
@@ -2043,7 +2041,7 @@ function Geminipro2UI() {
   };
 
   return (
-    <div className="bg-slate-900 h-screen w-screen flex flex-col font-sans antialiased">
+    <div className=" h-screen w-screen flex flex-col font-sans antialiased">
       <TopBar />
       <MessageContainer messages={messages} />
       <InputContainer onSendMessage={handleSendMessage} />
@@ -2055,10 +2053,76 @@ function Geminipro2UI() {
 
 
 
+function CalculationViaBackend({ token }) {
+  const [expr, setExpr] = useState('');
+  const [result, setResult] = useState('');
+  const handleSubmit = async (haha) => {
+    setResult('');
+    if (!haha.trim()) {
+      setResult('Please enter an expression');
+      return;
+    }
+    try {
+      const res = await fetch('http://localhost:5001/calculate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ expr: haha }),
+      });
+      const data = await res.json();
+      setResult(data.result !== undefined ? data.result : data.error);
+    } catch {
+      setResult('Error connecting to backend');
+    }
+  };
+  function handleChange(e){
+    const current = e.target.value
+    setExpr(current)
+    handleSubmit(current)
+
+
+
+  }
+  return (
+    <>
+      <input
+        type="text"
+        value={expr}
+        onChange={handleChange}
+        placeholder="e.g. 2+3*4"
+      />
+      <button onClick={handleSubmit}>submit math</button>
+      <div>{result}</div>
+    </>
+  );
+}
+function TestRender() {
+  const API_URL =
+    window.location.hostname === "localhost"
+      ? "http://localhost:5001"
+      : "https://my-express-backend-gyj9.onrender.com";
+
+  useEffect(() => {
+    fetch(`${API_URL}/`)
+      .then(res => res.json())
+      .then(data => console.log(data));
+  }, []);
+
+  return (
+    <>
+      <h1>Hello from TestRender</h1>
+      <CalculationViaBackend/>
+    </>
+  )
+}
+
+
 
 function Login_Add(){
   const [jsoncache, setJsoncache] = useState("");
-  const [atpage, setAtpage] = useState(22);
+  const [atpage, setAtpage] = useState(33);
   const [server, setServer] = useState('')
   return (
     <>
@@ -2069,6 +2133,7 @@ function Login_Add(){
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
         {atpage == 99 && <AllInOnePage />}
         {atpage == 22 && <Geminipro2UI />}
+        {atpage == 33 && <TestRender />}
       </div>
     </>
   );
