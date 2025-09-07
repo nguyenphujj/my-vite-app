@@ -2061,6 +2061,7 @@ function CalculationViaBackend({ token }) {
       ? "http://localhost:5001"
       : "https://my-express-backend-gyj9.onrender.com";
   const handleSubmit = async (haha) => {
+    setResult('');
     if (!haha.trim()) {
       setResult('Please enter an expression');
       return;
@@ -2093,7 +2094,7 @@ function CalculationViaBackend({ token }) {
         onChange={handleChange}
         placeholder="e.g. 2+3*4"
       />
-      <button onClick={() => handleSubmit('2+1')}>submit math</button>
+      <button>send</button>
       <div>{result}</div>
     </>
   );
