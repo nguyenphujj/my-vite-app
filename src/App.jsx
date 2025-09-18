@@ -6,7 +6,7 @@ import 'katex/dist/katex.min.css';
 
 import { motion, AnimatePresence } from "framer-motion";
 
-
+import axios from "axios";
 
 function MathRenderer({ text }) {
   // This regex looks for patterns like $$...$$ or $...$
@@ -2099,7 +2099,7 @@ function CalculationViaBackend({ token }) {
     </>
   );
 }
-function TestRender() {
+function RenderUI() {
   const API_URL =
     window.location.hostname === "localhost"
       ? "http://localhost:5001"
@@ -2113,10 +2113,181 @@ function TestRender() {
 
   return (
     <>
-      <h1>Hello from TestRender</h1>
+      <h1>Render</h1>
       <CalculationViaBackend/>
     </>
   )
+}
+
+
+
+function DatabaseUI() {
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleSubmit = async () => {
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/users`,
+        { name }
+      );
+      setMessage(`Saved: ${res.data.name}`);
+      setName("");
+    } catch (err) {
+      setMessage("Error saving name");
+    }
+  };
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h1>Enter your name</h1>
+      <input
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Type your name"
+      />
+      <button onClick={handleSubmit}>Send</button>
+      <p>{message}</p>
+    </div>
+  );
+}
+
+
+
+
+
+function VersionA1({outpass}) {
+  const [passcode, setPasscode] = useState('');
+  const [error, setError] = useState('');
+  const [token, setToken] = useState('');
+
+  const handleContinue = async () => {
+    setError('');
+    try {
+      const res = await fetch(
+        window.location.hostname === "localhost"
+          ? "http://localhost:5000/auth-passcode"
+          : "https://my-express-backend-gyj9.onrender.com/auth-passcode",
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ passcode }),
+        }
+      );
+      const data = await res.json();
+      if (res.ok && data.token) {
+        localStorage.setItem('jwt_token', data.token);
+        // Optionally: redirect or update UI here
+        setToken(data.token)
+      } else {
+        setError(data.error || 'Authentication failed');
+      }
+    } catch {
+      setError('Network error');
+    }
+  };
+
+  useEffect(() => {
+    if(token){
+      outpass(322)
+    }
+  }, [token]);
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white px-6">
+      <h1 className="text-3xl font-bold mb-10">MathWeb</h1>
+      <input
+        type="text"
+        placeholder="passcode"
+        value={passcode}
+        onChange={e => setPasscode(e.target.value)}
+        className="w-64 px-4 py-2 mb-4 border rounded-full text-center focus:outline-none focus:ring-2 focus:ring-black"
+      />
+      <button
+        className="w-64 py-2 mb-3 bg-black text-white rounded-full font-medium hover:bg-gray-800"
+        onClick={handleContinue}
+      >
+        continue
+      </button>
+      {error && <div className="text-red-500 mb-2">{error}</div>}
+      <a href="#" className="text-sm text-black underline hover:text-gray-700">
+        Sign up
+      </a>
+      {token && <h3>signed in</h3>}
+    </div>
+  );
+}
+
+
+function VersionA2({outpass}){
+
+  function handleSignout(){
+    localStorage.removeItem('jwt_token')
+    outpass(33)
+  }
+
+
+  return(
+    <>
+      <h1>page 2 is here</h1>
+      <button onClick={handleSignout}>sign out</button>
+    </>
+  )
+}
+
+
+function VersionA3() {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+
+  const handleSend = () => {
+    if (input.trim() === "") return;
+    setMessages([...messages, input]);
+    setInput("");
+  };
+
+  return (
+    <div className="flex flex-col h-screen bg-white">
+      {/* Header */}
+      <div className="bg-blue-200 text-center py-3 shadow-md">
+        <h1 className="text-lg font-medium">Chat</h1>
+      </div>
+
+      {/* Chat Area */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+        {messages.length === 0 ? (
+          <p className="text-gray-400 text-center">No messages yet...</p>
+        ) : (
+          messages.map((msg, i) => (
+            <div
+              key={i}
+              className="bg-blue-100 p-2 rounded-lg w-fit max-w-xs"
+            >
+              {msg}
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Input Area */}
+      <div className="flex items-center border-t border-gray-300 p-2 bg-blue-100">
+        <input
+          type="text"
+          placeholder="Type here..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          className="flex-1 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none"
+        />
+        <button
+          onClick={handleSend}
+          className="ml-2 bg-white px-4 py-2 rounded-lg shadow hover:bg-gray-100"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  );
 }
 
 
@@ -2125,6 +2296,15 @@ function Login_Add(){
   const [jsoncache, setJsoncache] = useState("");
   const [atpage, setAtpage] = useState(33);
   const [server, setServer] = useState('')
+  const [token1, setToken1] = useState('')
+
+  useEffect(() => {
+    const savedToken = localStorage.getItem('jwt_token');
+    if (savedToken) {
+      setAtpage(322);
+    }
+  }, []);
+  
   return (
     <>
       <div>
@@ -2134,7 +2314,9 @@ function Login_Add(){
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
         {atpage == 99 && <AllInOnePage />}
         {atpage == 22 && <Geminipro2UI />}
-        {atpage == 33 && <TestRender />}
+        
+        {atpage == 33 && <VersionA3 />}
+        {atpage == 322 && <VersionA2 outpass={setAtpage}/>}
       </div>
     </>
   );
