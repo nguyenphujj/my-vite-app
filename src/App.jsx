@@ -1901,12 +1901,14 @@ const ArrowLeftIcon = () => (
     </svg>
 );
 
-const TopBar = () => {
+function TopBar ({outpass}){
   return (
     <header className="fixed top-0 left-0 right-0 z-20">
       <div className="absolute top-0 left-0 w-full h-full bg-slate-900/70 backdrop-blur-lg"></div>
       <div className="relative z-10 flex items-center justify-between p-4 text-white">
-        <button className="p-2 -ml-2">
+        <button
+          onClick={() => {outpass(33)}}
+          className="p-2 -ml-2">
             <ArrowLeftIcon />
         </button>
         <div className="flex flex-col items-center">
@@ -2022,7 +2024,9 @@ const InputContainer = ({ onSendMessage }) => {
   );
 };
 
-function Geminipro2UI() {
+function Geminipro2UI({outpass2}) {
+  const [foroutpass, setForoutpass] = useState('');
+
   const [messages, setMessages] = useState([
     { id: 1, text: 'Hey, how is it going?', isSent: false },
     { id: 2, text: 'Hi! I am doing great. Thanks for asking!', isSent: true },
@@ -2040,9 +2044,15 @@ function Geminipro2UI() {
     setMessages([...messages, newMessage]);
   };
 
+  useEffect(() => {
+    if(foroutpass == 33){
+      outpass2(33) //putting this line outside of IF will crash frontend
+    }
+  }, [foroutpass]);
+
   return (
     <div className=" h-screen w-screen flex flex-col font-sans antialiased">
-      <TopBar />
+      <TopBar outpass={setForoutpass}/>
       <MessageContainer messages={messages} />
       <InputContainer onSendMessage={handleSendMessage} />
     </div>
@@ -2236,56 +2246,21 @@ function VersionA2({outpass}){
 }
 
 
-function VersionA3() {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
 
-  const handleSend = () => {
-    if (input.trim() === "") return;
-    setMessages([...messages, input]);
-    setInput("");
-  };
+function DatabaseDisplay() {
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/users")
+      .then((res) => res.json())
+      .then((data) => setUsers(data))
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
-    <div className="flex flex-col h-screen bg-white">
-      {/* Header */}
-      <div className="bg-blue-200 text-center py-3 shadow-md">
-        <h1 className="text-lg font-medium">Chat</h1>
-      </div>
-
-      {/* Chat Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {messages.length === 0 ? (
-          <p className="text-gray-400 text-center">No messages yet...</p>
-        ) : (
-          messages.map((msg, i) => (
-            <div
-              key={i}
-              className="bg-blue-100 p-2 rounded-lg w-fit max-w-xs"
-            >
-              {msg}
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Input Area */}
-      <div className="flex items-center border-t border-gray-300 p-2 bg-blue-100">
-        <input
-          type="text"
-          placeholder="Type here..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          className="flex-1 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none"
-        />
-        <button
-          onClick={handleSend}
-          className="ml-2 bg-white px-4 py-2 rounded-lg shadow hover:bg-gray-100"
-        >
-          Send
-        </button>
-      </div>
+    <div>
+      <h1>Users Table</h1>
+      <pre>{JSON.stringify(users, null, 2)}</pre>
     </div>
   );
 }
@@ -2294,7 +2269,7 @@ function VersionA3() {
 
 function Login_Add(){
   const [jsoncache, setJsoncache] = useState("");
-  const [atpage, setAtpage] = useState(33);
+  const [atpage, setAtpage] = useState(55);
   const [server, setServer] = useState('')
   const [token1, setToken1] = useState('')
 
@@ -2313,10 +2288,10 @@ function Login_Add(){
         {atpage == 111 && <ChatPage />}
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
         {atpage == 99 && <AllInOnePage />}
-        {atpage == 22 && <Geminipro2UI />}
+        {atpage == 55 && <DatabaseDisplay />}
         
-        {atpage == 33 && <VersionA3 />}
-        {atpage == 322 && <VersionA2 outpass={setAtpage}/>}
+        {atpage == 33 && <VersionA1 outpass={setAtpage}/>}
+        {atpage == 322 && <Geminipro2UI outpass2={setAtpage}/>}
       </div>
     </>
   );
