@@ -12,31 +12,20 @@ function MathRenderer({ text }) {
   // This regex looks for patterns like $$...$$ or $...$
   // It captures the content inside the delimiters and the delimiter type.
   const parts = text.split(/(\$\$[^$]+\$\$|\$[^$]+\$)/g);
-
   return (
     <div>
       {parts.map((part, index) => {
         if (part.startsWith('$$') && part.endsWith('$$')) {
           // Double dollar signs for block math
           const mathContent = part.slice(2, -2);
-          return <BlockMath key={index}>{mathContent}</BlockMath>;
+          return <BlockMath math={mathContent} />
         } else if (part.startsWith('$') && part.endsWith('$')) {
           // Single dollar signs for inline math
           const mathContent = part.slice(1, -1);
-          return <InlineMath key={index}>{mathContent}</InlineMath>;
+          return <InlineMath math={mathContent} />
         } else {
-          // Regular text, handle multiline
-          const lines = part.split('\n');
-          return (
-            <span key={index}>
-              {lines.map((line, i) => (
-                <React.Fragment key={i}>
-                  {line}
-                  {i < lines.length - 1 && <br />}
-                </React.Fragment>
-              ))}
-            </span>
-          );
+          // Regular text
+          return <span key={index}>{part}</span>;
         }
       })}
     </div>
@@ -2068,10 +2057,10 @@ function CalculationViaBackend({ token }) {
   const [result, setResult] = useState('');
   const API_URL =
     window.location.hostname === "localhost"
-      ? "http://localhost:5001"
+      ? "http://localhost:5000"
       : "https://my-express-backend-gyj9.onrender.com";
   const handleSubmit = async (haha) => {
-    setResult('');
+    //setResult('');
     if (!haha.trim()) {
       setResult('Please enter an expression');
       return;
@@ -2103,12 +2092,19 @@ function CalculationViaBackend({ token }) {
         value={expr}
         onChange={handleChange}
         placeholder="e.g. 2+3*4"
+        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
-      <button>send</button>
+      <button
+        className={`px-4 py-2 text-white rounded-lg hover:bg-blue-700 bg-blue-600 disabled:bg-gray-400`}
+        disabled={!expr.trim()}
+        onClick={() => setResult('button is working')}
+        >send
+      </button>
       <div>{result}</div>
     </>
   );
 }
+
 function RenderUI() {
   const API_URL =
     window.location.hostname === "localhost"
@@ -2172,7 +2168,7 @@ function VersionA1({outpass}) {
   const [token, setToken] = useState('');
 
   const handleContinue = async () => {
-    setError('');
+    //setError(''); // => causes screen flickering when click continue with empty input
     try {
       const res = await fetch(
         window.location.hostname === "localhost"
@@ -2197,11 +2193,11 @@ function VersionA1({outpass}) {
     }
   };
 
-  useEffect(() => {
+  /* useEffect(() => {
     if(token){
-      outpass(322)
+      outpass(322) //at beginning, there is no token, as soon as there is, this will route you to this atpage num
     }
-  }, [token]);
+  }, [token]); */
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white px-6">
@@ -2224,6 +2220,7 @@ function VersionA1({outpass}) {
         Sign up
       </a>
       {token && <h3>signed in</h3>}
+      <CalculationViaBackend token={token}/>
     </div>
   );
 }
@@ -2249,6 +2246,7 @@ function VersionA2({outpass}){
 
 function DatabaseDisplay() {
   const [users, setUsers] = useState([]);
+  const [text, setText] = useState('');
 
   useEffect(() => {
     fetch("http://localhost:5000/users")
@@ -2257,9 +2255,34 @@ function DatabaseDisplay() {
       .catch((err) => console.error(err));
   }, []);
 
+  function handleContinue(){
+    setUsers((prev) => [...prev, { name: 'user1', message: text }]);
+  }
+
   return (
     <div>
-      <h1>Users Table</h1>
+      <h1 className="text-3xl font-bold mb-5">Users Table</h1>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Type a message..."
+        className="w-full resize-none rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 pr-12 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 transition-shadow"
+      />
+      <button
+        className="w-64 py-2 mb-3 bg-black text-white rounded-full font-medium hover:bg-gray-800"
+        onClick={handleContinue}
+      >
+        continue
+      </button>
+      <FrontendToDatabase/>
+      <div>
+        {users.map((item, idx) => (
+          <div key={idx}>
+            <strong>{item.name}</strong>
+            {item.message && <MathRenderer text={item.message}/>}
+          </div>
+        ))}
+      </div>
       <pre>{JSON.stringify(users, null, 2)}</pre>
     </div>
   );
@@ -2267,18 +2290,182 @@ function DatabaseDisplay() {
 
 
 
+
+
+function FrontendToDatabase() {
+  const [message, setMessage] = useState("");
+
+  const sendMessage = async () => {
+    if (!message.trim()) return;
+
+    try {
+      await fetch("http://localhost:5000/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      setMessage(""); // clear textarea
+    } catch (err) {
+      console.error("Error sending message:", err);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-start gap-2 w-full max-w-md">
+      <textarea
+        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        rows={4}
+        placeholder="Type your message..."
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+      />
+      <button
+        onClick={sendMessage}
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+      >
+        Send
+      </button>
+    </div>
+  );
+}
+
+
+
+
+
+
+function FrontendBackendAPI() {
+  const [prompt, setPrompt] = useState("");
+  const [response, setResponse] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false); // <-- Add this state
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsProcessing(true); // <-- Set processing to true
+
+    const res = await fetch("http://localhost:5000/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    });
+
+    let data = {};
+    try {
+      data = await res.json();
+    } catch {
+      setResponse("No response or invalid JSON from server.");
+      setIsProcessing(false); // <-- Reset processing
+      return;
+    }
+    setResponse(data.reply || "No reply from server.");
+    setIsProcessing(false); // <-- Reset processing
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <textarea
+          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          rows={4}
+          placeholder="Ask me something..."
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+        />
+        <button
+          type="submit"
+          className={`px-4 py-2 text-white rounded-lg hover:bg-blue-700 bg-blue-600 disabled:bg-gray-400`}
+          disabled={isProcessing || !prompt.trim()} // <-- Disable while processing
+        >
+          {isProcessing ? "Computer is thinking..." : "Send"}
+        </button>
+      </form>
+      <textarea
+        value={response}
+        onChange={(e) => setResponse(e.target.value)}
+        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        rows={4}
+      />
+      <div style={{ maxWidth: "600px", whiteSpace: "pre-line" }}>
+        {response && <MathRenderer text={response} />}
+      </div>
+    </div>
+  );
+}
+
+
+
+
+function ImageUpload() {
+  const [file, setFile] = useState(null);
+  const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleUpload = async () => {
+    if (!file) return;
+    setLoading(true);
+    setDescription("");
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const res = await fetch("http://localhost:5000/api/analyze-image", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    setDescription(data.description || "No description found");
+    setLoading(false);
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4 p-6">
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => setFile(e.target.files[0])}
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+      />
+
+      <button
+        onClick={handleUpload}
+        disabled={!file || loading}
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+      >
+        {loading ? "Analyzing..." : "Upload & Analyze"}
+      </button>
+
+      {description && (
+        <div className="mt-4 p-4 border rounded-lg shadow w-full max-w-md">
+          <h2 className="font-bold mb-2">Image Description:</h2>
+          <p>{description}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+
+
+
+
+
+
 function Login_Add(){
   const [jsoncache, setJsoncache] = useState("");
-  const [atpage, setAtpage] = useState(55);
+  const [atpage, setAtpage] = useState(33);
   const [server, setServer] = useState('')
   const [token1, setToken1] = useState('')
 
-  useEffect(() => {
+  //whenever reload => check if token, if yes (regardless valid or not) => route to designated atpage
+  //this will override the useState above if there is token. to make useState work again, delete the token in localStorage
+  /* useEffect(() => {
     const savedToken = localStorage.getItem('jwt_token');
     if (savedToken) {
       setAtpage(322);
     }
-  }, []);
+  }, []); */
   
   return (
     <>
@@ -2289,7 +2476,12 @@ function Login_Add(){
         {atpage == 1 && <Another outpassBackpage={setAtpage} outpassjson={setServer} inpassServer={server}/>}
         {atpage == 99 && <AllInOnePage />}
         {atpage == 55 && <DatabaseDisplay />}
+        {atpage == 12 && <FrontendBackendAPI />}
+        {atpage == 13 && <ImageUpload />}
+        {atpage == 444 && <CalculationViaBackend />}
         
+        {/* this is hard to understand, at first, atpage=33, triggering this component, now atpage=null, detriggering this very component */}
+        {/* but since this doesn't create conflict, so there must a state other than null */}
         {atpage == 33 && <VersionA1 outpass={setAtpage}/>}
         {atpage == 322 && <Geminipro2UI outpass2={setAtpage}/>}
       </div>
