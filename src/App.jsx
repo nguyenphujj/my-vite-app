@@ -471,7 +471,7 @@ function InputOutputSection({inpass}){
     },
     {
       "sender": "bot",
-      "text": "Đây là lời giải:\n$$ 2x^2+4x-1=0 $$\nSử dụng công thức nghiệm của phương trình bậc hai $ax^2+bx+c=0$, ta có $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$.\nTrong đó: $a=2$, $b=4$, $c=-1$.\n\nTính delta ($\\Delta$):\n$$ \\Delta = b^2 - 4ac = 4^2 - 4(2)(-1) $$\n$$ \\Delta = 16 + 8 $$\n$$ \\Delta = 24 $$\nVì $\\Delta > 0$, phương trình có hai nghiệm phân biệt:\n$$ x = \\frac{-4 \\pm \\sqrt{24}}{2(2)} $$\n$$ x = \\frac{-4 \\pm \\sqrt{4 \\cdot 6}}{4} $$\n$$ x = \\frac{-4 \\pm 2\\sqrt{6}}{4} $$\nChia cả tử và mẫu cho 2:\n$$ x = \\frac{-2 \\pm \\sqrt{6}}{2} $$\nVậy hai nghiệm của phương trình là:\n$$ x_1 = \\frac{-2 + \\sqrt{6}}{2} $$\n$$ x_2 = \\frac{-2 - \\sqrt{6}}{2} $$"
+      "text": "haha"
     }
   ]
   //myjson = inpass, from now on
@@ -487,9 +487,6 @@ function InputOutputSection({inpass}){
     setBotinput('')
     setMyjson((prev) => [...prev, { sender: 'bot', text: botinput }]);
   }
-
-
-
 
 
 
@@ -673,7 +670,7 @@ function Whatsapp() {
     },
     {
       "sender": "bot",
-      "text": "Đây là lời giải:\n$$ 2x^2+4x-1=0 $$\nSử dụng công thức nghiệm của phương trình bậc hai $ax^2+bx+c=0$, ta có $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$.\nTrong đó: $a=2$, $b=4$, $c=-1$.\n\nTính delta ($\\Delta$):\n$$ \\Delta = b^2 - 4ac = 4^2 - 4(2)(-1) $$\n$$ \\Delta = 16 + 8 $$\n$$ \\Delta = 24 $$\nVì $\\Delta > 0$, phương trình có hai nghiệm phân biệt:\n$$ x = \\frac{-4 \\pm \\sqrt{24}}{2(2)} $$\n$$ x = \\frac{-4 \\pm \\sqrt{4 \\cdot 6}}{4} $$\n$$ x = \\frac{-4 \\pm 2\\sqrt{6}}{4} $$\nChia cả tử và mẫu cho 2:\n$$ x = \\frac{-2 \\pm \\sqrt{6}}{2} $$\nVậy hai nghiệm của phương trình là:\n$$ x_1 = \\frac{-2 + \\sqrt{6}}{2} $$\n$$ x_2 = \\frac{-2 - \\sqrt{6}}{2} $$"
+      "text": "haha"
     }
   ]
 
@@ -692,7 +689,7 @@ function Whatsapp() {
     // Simulate bot response
     setTimeout(() => {
       const botReplies = [
-        "Reaction & Structure The Protein Folding Problem Proteins are chains of amino acids that fold into precise 3D shapes. Predicting folding was unsolved for decades, though AI (like DeepMind’s AlphaFold) has made big progress. Still, the full rules of folding dynamics aren’t fully understood. Catalysis Mysteries Catalysts speed up reactions, but often chemists don’t fully know how at the atomic level. For example, nitrogen fixation (turning N₂ into ammonia) in biological enzymes and industrial processes is still not completely understood. Water’s Weirdness Water has dozens of unusual properties (it expands when frozen, high heat capacity, multiple liquid phases). The exact molecular explanation for some of these anomalies is still debated.",
+        "haha",
       ];
       const randomReply =
         botReplies[Math.floor(Math.random() * botReplies.length)];
@@ -824,7 +821,6 @@ function ViewportUI() {
   const [messages, setMessages] = useState([
     "Hello!",
     "How are you?",
-    "tinhyeu maunang (good v song) the night we met (good opening) obel the curse (good mid) ncs popsicle (like omfg, easy to forget) spice girls spice up vicetone walk thru fire noi gio roi (the clinic) hoa tinh (popular c song, gentle, smooth) doi tuthe (xam family tren lung) je te des mots (sad modern symphony, sounds like you made me smile) in this shirt (famous tik, i am lost, astronaut space theme, sounds like moon kid) 2.10 sounds like what https://www.youtube.com/watch?v=6G1tP10MrqM neu anh trang ko den https://www.youtube.com/watch?v=7gbw51prf5Y tay trai chi trang (c song, high pitch desperate) tuong quan (sounds like tranh duyen) mynhan (sounds like the thai) don't you worry child (like avicii) duong mot chieu (repeated, da biet nhau tu lau, v) way down we go (tik, ooh ooh ooh' ooh ooh' ooh`) ngoinha hoahong (banchan anh buoc) who loves the sun (weird good melody) so phai ketthuc where the trap is (liverpool pressing animals), ali the game ins (mayweather) fourth of july (tik mom mom) put your records on intentionally i fuck with you palladio (classic good) calabria (ronaldinho, why you run) hoa co lau (v good flow, flow like em nguyen, but with neutral accent) tinh nguyet thanthoai (c very good)"
   ]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
@@ -2592,6 +2588,7 @@ function ExampleForAdminOnly() {
     </div>
   );
 }
+
 
 
 
