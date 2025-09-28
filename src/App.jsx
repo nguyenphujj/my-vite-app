@@ -2059,9 +2059,9 @@ function CalculationViaBackend({ token }) {
     window.location.hostname === "localhost"
       ? "http://localhost:5000"
       : "https://my-express-backend-gyj9.onrender.com";
-  const handleSubmit = async (haha) => {
+  const handleSubmit = async (math) => {
     //setResult('');
-    if (!haha.trim()) {
+    if (!math.trim()) {
       setResult('Please enter an expression');
       return;
     }
@@ -2072,7 +2072,7 @@ function CalculationViaBackend({ token }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ expr: haha }),
+        body: JSON.stringify({ expr: math }),
       });
       const data = await res.json();
       setResult(data.result !== undefined ? data.result : data.error);
@@ -2449,12 +2449,159 @@ function ImageUpload() {
 
 
 
+function ExampleRequestLimit() {
+  const [password, setPassword] = useState("");
+  const [token, setToken] = useState(localStorage.getItem("token") || "");
+  const [messages, setMessages] = useState([]);
+  const [limitReached, setLimitReached] = useState(false);
+
+  const handleLogin = async () => {
+    try {
+      const res = await axios.post("http://localhost:5000/authVer2", { password });
+      localStorage.setItem("token", res.data.token);
+      setToken(res.data.token);
+      setMessages(["✅ Logged in as Alice"]);
+    } catch (err) {
+      alert("❌ Invalid password");
+    }
+  };
+
+  const handleRequest = async () => {
+    if (limitReached) return;
+
+    try {
+      const res = await axios.get("http://localhost:5000/requestcount", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMessages((prev) => [...prev, res.data.message]);
+    } catch (err) {
+      if (err.response?.status === 429) {
+        setLimitReached(true);
+        setMessages((prev) => [...prev, "⚠️ Request limit reached!"]);
+      } else {
+        setMessages((prev) => [...prev, "❌ Error sending request"]);
+      }
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      {!token ? (
+        <div className="bg-white p-6 rounded-2xl shadow-md w-80 text-center">
+          <h1 className="text-2xl font-bold mb-4">Login</h1>
+          <input
+            type="password"
+            className="border p-2 rounded w-full mb-3"
+            placeholder="Enter password (123)"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            onClick={handleLogin}
+          >
+            Send
+          </button>
+        </div>
+      ) : (
+        <div className="bg-white p-6 rounded-2xl shadow-md w-96 text-center">
+          <h2 className="text-xl font-bold mb-4">Welcome Alice</h2>
+          <button
+            disabled={limitReached}
+            className={`px-4 py-2 rounded ${
+              limitReached ? "bg-gray-400" : "bg-green-500 hover:bg-green-600"
+            } text-white`}
+            onClick={handleRequest}
+          >
+            Send Request
+          </button>
+          <div className="mt-4 text-left space-y-1">
+            {messages.map((m, i) => (
+              <div key={i} className="text-sm">{m}</div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+
+
+function ExampleForAdminOnly() {
+  const [input, setInput] = useState("");
+  const [token, setToken] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleLogin = async () => {
+    const res = await fetch("http://localhost:5000/authVer2", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: input }),
+    });
+    const data = await res.json();
+    if (data.token) {
+      setToken(data.token);
+      setMessage(`Logged in as ${data.user.username}`);
+    } else {
+      setMessage(data.error || "Login failed");
+    }
+  };
+
+  const handleAdmin = async () => {
+    const res = await fetch("http://localhost:5000/foradmin", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    setMessage(data.message || data.error);
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen gap-4 bg-gray-100">
+      <div className="bg-white p-6 rounded-2xl shadow-md w-80 text-center">
+        <h1 className="text-2xl font-bold mb-4">Simple Login</h1>
+        <input
+          type="text"
+          className="border p-2 w-full rounded mb-3"
+          placeholder='Type "123" or "321"'
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <button
+          onClick={handleLogin}
+          className="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2"
+        >
+          Send
+        </button>
+
+        <button
+          onClick={handleAdmin}
+          className="bg-purple-500 text-white px-4 py-2 rounded w-full"
+          disabled={!token}
+        >
+          Access /foradmin
+        </button>
+
+        {message && (
+          <div className="mt-4 text-sm text-gray-700 bg-gray-50 p-2 rounded">
+            {message}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+
+
 
 
 
 function Login_Add(){
   const [jsoncache, setJsoncache] = useState("");
-  const [atpage, setAtpage] = useState(33);
+  const [atpage, setAtpage] = useState(16);
   const [server, setServer] = useState('')
   const [token1, setToken1] = useState('')
 
@@ -2479,6 +2626,8 @@ function Login_Add(){
         {atpage == 12 && <FrontendBackendAPI />}
         {atpage == 13 && <ImageUpload />}
         {atpage == 444 && <CalculationViaBackend />}
+        {atpage == 15 && <ExampleRequestLimit />}
+        {atpage == 16 && <ExampleForAdminOnly />}
         
         {/* this is hard to understand, at first, atpage=33, triggering this component, now atpage=null, detriggering this very component */}
         {/* but since this doesn't create conflict, so there must a state other than null */}
