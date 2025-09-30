@@ -8,6 +8,16 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import axios from "axios";
 
+
+
+
+
+
+
+
+const API_URL = window.location.hostname === "localhost" ?
+  "http://localhost:5000" : "https://my-express-backend-gyj9.onrender.com";
+
 function MathRenderer({ text }) {
   // This regex looks for patterns like $$...$$ or $...$
   // It captures the content inside the delimiters and the delimiter type.
@@ -31,6 +41,14 @@ function MathRenderer({ text }) {
     </div>
   );
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -471,7 +489,7 @@ function InputOutputSection({inpass}){
     },
     {
       "sender": "bot",
-      "text": "haha"
+      "text": "Đây là lời giải:\n$$ 2x^2+4x-1=0 $$\nSử dụng công thức nghiệm của phương trình bậc hai $ax^2+bx+c=0$, ta có $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$.\nTrong đó: $a=2$, $b=4$, $c=-1$.\n\nTính delta ($\\Delta$):\n$$ \\Delta = b^2 - 4ac = 4^2 - 4(2)(-1) $$\n$$ \\Delta = 16 + 8 $$\n$$ \\Delta = 24 $$\nVì $\\Delta > 0$, phương trình có hai nghiệm phân biệt:\n$$ x = \\frac{-4 \\pm \\sqrt{24}}{2(2)} $$\n$$ x = \\frac{-4 \\pm \\sqrt{4 \\cdot 6}}{4} $$\n$$ x = \\frac{-4 \\pm 2\\sqrt{6}}{4} $$\nChia cả tử và mẫu cho 2:\n$$ x = \\frac{-2 \\pm \\sqrt{6}}{2} $$\nVậy hai nghiệm của phương trình là:\n$$ x_1 = \\frac{-2 + \\sqrt{6}}{2} $$\n$$ x_2 = \\frac{-2 - \\sqrt{6}}{2} $$"
     }
   ]
   //myjson = inpass, from now on
@@ -487,6 +505,9 @@ function InputOutputSection({inpass}){
     setBotinput('')
     setMyjson((prev) => [...prev, { sender: 'bot', text: botinput }]);
   }
+
+
+
 
 
 
@@ -670,7 +691,7 @@ function Whatsapp() {
     },
     {
       "sender": "bot",
-      "text": "haha"
+      "text": "Đây là lời giải:\n$$ 2x^2+4x-1=0 $$\nSử dụng công thức nghiệm của phương trình bậc hai $ax^2+bx+c=0$, ta có $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$.\nTrong đó: $a=2$, $b=4$, $c=-1$.\n\nTính delta ($\\Delta$):\n$$ \\Delta = b^2 - 4ac = 4^2 - 4(2)(-1) $$\n$$ \\Delta = 16 + 8 $$\n$$ \\Delta = 24 $$\nVì $\\Delta > 0$, phương trình có hai nghiệm phân biệt:\n$$ x = \\frac{-4 \\pm \\sqrt{24}}{2(2)} $$\n$$ x = \\frac{-4 \\pm \\sqrt{4 \\cdot 6}}{4} $$\n$$ x = \\frac{-4 \\pm 2\\sqrt{6}}{4} $$\nChia cả tử và mẫu cho 2:\n$$ x = \\frac{-2 \\pm \\sqrt{6}}{2} $$\nVậy hai nghiệm của phương trình là:\n$$ x_1 = \\frac{-2 + \\sqrt{6}}{2} $$\n$$ x_2 = \\frac{-2 - \\sqrt{6}}{2} $$"
     }
   ]
 
@@ -689,7 +710,7 @@ function Whatsapp() {
     // Simulate bot response
     setTimeout(() => {
       const botReplies = [
-        "haha",
+        "Reaction & Structure The Protein Folding Problem Proteins are chains of amino acids that fold into precise 3D shapes. Predicting folding was unsolved for decades, though AI (like DeepMind’s AlphaFold) has made big progress. Still, the full rules of folding dynamics aren’t fully understood. Catalysis Mysteries Catalysts speed up reactions, but often chemists don’t fully know how at the atomic level. For example, nitrogen fixation (turning N₂ into ammonia) in biological enzymes and industrial processes is still not completely understood. Water’s Weirdness Water has dozens of unusual properties (it expands when frozen, high heat capacity, multiple liquid phases). The exact molecular explanation for some of these anomalies is still debated.",
       ];
       const randomReply =
         botReplies[Math.floor(Math.random() * botReplies.length)];
@@ -821,6 +842,7 @@ function ViewportUI() {
   const [messages, setMessages] = useState([
     "Hello!",
     "How are you?",
+    "tinhyeu maunang (good v song) the night we met (good opening) obel the curse (good mid) ncs popsicle (like omfg, easy to forget) spice girls spice up vicetone walk thru fire noi gio roi (the clinic) hoa tinh (popular c song, gentle, smooth) doi tuthe (xam family tren lung) je te des mots (sad modern symphony, sounds like you made me smile) in this shirt (famous tik, i am lost, astronaut space theme, sounds like moon kid) 2.10 sounds like what https://www.youtube.com/watch?v=6G1tP10MrqM neu anh trang ko den https://www.youtube.com/watch?v=7gbw51prf5Y tay trai chi trang (c song, high pitch desperate) tuong quan (sounds like tranh duyen) mynhan (sounds like the thai) don't you worry child (like avicii) duong mot chieu (repeated, da biet nhau tu lau, v) way down we go (tik, ooh ooh ooh' ooh ooh' ooh`) ngoinha hoahong (banchan anh buoc) who loves the sun (weird good melody) so phai ketthuc where the trap is (liverpool pressing animals), ali the game ins (mayweather) fourth of july (tik mom mom) put your records on intentionally i fuck with you palladio (classic good) calabria (ronaldinho, why you run) hoa co lau (v good flow, flow like em nguyen, but with neutral accent) tinh nguyet thanthoai (c very good)"
   ]);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef(null);
@@ -2272,12 +2294,14 @@ function DatabaseDisplay() {
       </button>
       <FrontendToDatabase/>
       <div>
-        {users.map((item, idx) => (
-          <div key={idx}>
-            <strong>{item.name}</strong>
-            {item.message && <MathRenderer text={item.message}/>}
-          </div>
-        ))}
+        {users
+          .filter(item => item.id === 5)
+          .map((item, idx) => (
+            <div key={item.id ?? idx}>
+              <strong>{item.name}</strong>
+              {item.message && <MathRenderer text={item.message} />}
+            </div>
+          ))}
       </div>
       <pre>{JSON.stringify(users, null, 2)}</pre>
     </div>
@@ -2404,7 +2428,7 @@ function ImageUpload() {
     const formData = new FormData();
     formData.append("image", file);
 
-    const res = await fetch("http://localhost:5000/api/analyze-image", {
+    const res = await fetch(`${API_URL}/api/analyze-image`, {
       method: "POST",
       body: formData,
     });
@@ -2531,14 +2555,15 @@ function ExampleForAdminOnly() {
   const [message, setMessage] = useState("");
 
   const handleLogin = async () => {
-    const res = await fetch("http://localhost:5000/authVer2", {
+    const res = await fetch(`${API_URL}/authVer2`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password: input }),
     });
     const data = await res.json();
     if (data.token) {
-      setToken(data.token);
+      setToken(data.token);//this token is only stored in variable, so it will be lost whenever reload the page
+      //and other components can't access the token, unless this component outpasses the token
       setMessage(`Logged in as ${data.user.username}`);
     } else {
       setMessage(data.error || "Login failed");
@@ -2546,11 +2571,16 @@ function ExampleForAdminOnly() {
   };
 
   const handleAdmin = async () => {
-    const res = await fetch("http://localhost:5000/foradmin", {
+    const res = await fetch(`${API_URL}/foradmin`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
     setMessage(data.message || data.error);
+    //res.json stands for DataStreamFromBackend
+    //"message" and "error" are not arbitrary
+    // they are named "message" and "error" because in the DataStreamFromBackend
+    // they are written "message" and "error"
+    //this is the important linker between backend and frontend
   };
 
   return (
@@ -2567,6 +2597,7 @@ function ExampleForAdminOnly() {
         <button
           onClick={handleLogin}
           className="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2"
+          disabled={!input}
         >
           Send
         </button>
@@ -2588,6 +2619,17 @@ function ExampleForAdminOnly() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
