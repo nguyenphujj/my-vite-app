@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import axios from "axios";
 
-
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 
 
@@ -2294,21 +2294,75 @@ function DatabaseDisplay() {
       </button>
       <FrontendToDatabase/>
       <div>
+        {/* if this throws error, make sure the endpoint fetches the right table */}
+        {users.map((item, idx) => (
+          <div key={idx}>
+            <strong>{item.name}</strong>
+            {item.message && <MathRenderer text={item.message}/>}
+          </div>
+        ))}
+      </div>
+      <div style={{ whiteSpace: "pre-line" }}>
+        {/* this is meant to display the systemprompt for debugging sake */}
+        {/* comment this out if you don't wanna see it */}
+        {/* if this throws error, make sure the endpoint fetches the right table */}
         {users
-          .filter(item => item.id === 5)
+          .filter(item => item.id === 2)//this will filter or display specific items only
           .map((item, idx) => (
-            <div key={item.id ?? idx}>
-              <strong>{item.name}</strong>
-              {item.message && <MathRenderer text={item.message} />}
+            <div key={item.id ?? idx}>{/* if there is item.id then use it, otherwise simply use idx */}
+              <strong>{item.systemprompt}</strong>
             </div>
           ))}
       </div>
+      {/* if this throws error, make sure the endpoint fetches the right table */}
       <pre>{JSON.stringify(users, null, 2)}</pre>
     </div>
   );
 }
 
 
+//this component isn't checked yet, i don't know if it works or not
+function DisplaySystemPromptForDebugging() {
+  const [thewholetable, setThewholetable] = useState([]);
+  useEffect(() => {
+    fetch("http://localhost:5000/users")
+      .then((res) => res.json())
+      .then((data) => setThewholetable(data))
+      .catch((err) => console.error(err));
+  }, []);
+  return (
+    <div>
+      <div style={{ whiteSpace: "pre-line" }}>
+        {thewholetable
+          .filter(item => item.id === 2)//this will filter or display specific items only
+          .map((item, idx) => (
+            <div key={item.id ?? idx}>{/* if there is item.id then use it, otherwise simply use idx */}
+              <strong>{item.systemprompt}</strong>
+            </div>
+          ))}
+      </div>
+      {/* <pre>{JSON.stringify(thewholetable, null, 2)}</pre> */}
+    </div>
+  );
+}
+//this component isn't checked yet, i don't know if it works or not
+function Inpass_DisplaySystemPrompt_ForDebugging({inpass_thewhole_jsonarray_here}) {
+  const [thewholetable, setThewholetable] = useState(inpass_thewhole_jsonarray_here);
+  return (
+    <div>
+      <div style={{ whiteSpace: "pre-line" }}>
+        {thewholetable
+          .filter(item => item.id === 2)//this will filter or display specific items only
+          .map((item, idx) => (
+            <div key={item.id ?? idx}>{/* if there is item.id then use it, otherwise simply use idx */}
+              <strong>{item.systemprompt}</strong>
+            </div>
+          ))}
+      </div>
+      {/* <pre>{JSON.stringify(thewholetable, null, 2)}</pre> */}
+    </div>
+  );
+}
 
 
 
@@ -2363,7 +2417,7 @@ function FrontendBackendAPI() {
     e.preventDefault();
     setIsProcessing(true); // <-- Set processing to true
 
-    const res = await fetch("http://localhost:5000/api/chat", {
+    const res = await fetch(`${API_URL}/gptgeneralbackend`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt }),
@@ -2403,6 +2457,7 @@ function FrontendBackendAPI() {
         value={response}
         onChange={(e) => setResponse(e.target.value)}
         className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Output editor..."
         rows={4}
       />
       <div style={{ maxWidth: "600px", whiteSpace: "pre-line" }}>
@@ -2411,6 +2466,126 @@ function FrontendBackendAPI() {
     </div>
   );
 }
+
+
+
+
+
+
+
+//check frontend url, check frontend component name
+//check all the backend urls that the component make calls to
+
+//derived from component FrontendBackendAPI
+//this component is for you admin
+//it features all functions like auth, admincheck, requestCount, all in one, to simulate the entire picture for you
+function GPTgeneral() {
+  const [prompt, setPrompt] = useState("");
+  const [response, setResponse] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false); // <-- Add this state
+  const [password, setPassword] = useState("");
+  const [vartoken, setVartoken] = useState("");
+
+  
+  //auth flow
+  //type password => click sign in => axios sends password to /auth in backend
+  //backend checks password => sends token+user back to frontend
+  //frontend receives token+user => stores them in localStorage for later use
+  const handleLogin = async () => { 
+    try {
+      const response = await axios.post(`${API_URL}/authVer2`, {password,});
+
+      if (response.data.token) {
+        setVartoken(response.data.token);//this is vartoken, so it will be lost whenever reload the page
+        //and other components can't access vartoken, unless this component outpasses vartoken
+        localStorage.setItem("localtoken", response.data.token);//this is localtoken
+        //which will retain after page reload and can be accessed anywhere in frontend code
+        localStorage.setItem("localuser", response.data.user.username);//if you write .user only, it will simply print "object"
+      } else {
+      }
+    } catch (error) {
+    }
+  };
+
+
+  //this will send prompt to a protected endpoint in backend
+  //if you wanna remove the protection, just remove the middleware in the endpoint in backend
+  //protected endpoint flow
+  // once you signed in, the token either stored as localtoken or vartoken
+  // but you should include the token in the backend call
+  const handleSubmit = async (yourevent) => {
+    yourevent.preventDefault(); // this is a critical line for form, without this line the whole page will reload when you submit
+    setIsProcessing(true); // this is for button disable during API thinking
+
+    try {
+      const response = await axios.post(`${API_URL}/gptgeneralProtectedBackend`, {
+        prompt,//the prompt will be in req.body.prompt when it arrives in backend
+      }, {
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${vartoken}`
+          //the token will be in req.headers.authorization when it arrives in backend
+          //you can always send token to backend regardless backend requires it or not
+        },
+      });
+
+      setResponse(response.data.reply || "Frontend: No reply from server.");
+    } catch (error) {
+      setResponse("Frontend: No response or invalid JSON from server.");
+    } finally {
+      setIsProcessing(false); // for button disable
+    }
+  };
+
+  return (
+    <div>
+      <input
+        className="w-[300px] p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button
+        className={`px-4 py-2 text-white rounded-lg hover:bg-blue-700 bg-blue-600 disabled:bg-gray-400`}
+        disabled={!password.trim()}
+        onClick={handleLogin}
+        >sign in
+      </button>
+      <form onSubmit={handleSubmit}>
+        <textarea
+          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          rows={4}
+          placeholder="Ask me something..."
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+        />
+        <button
+          type="submit"
+          className={`px-4 py-2 text-white rounded-lg hover:bg-blue-700 bg-blue-600 disabled:bg-gray-400`}
+          disabled={isProcessing || !prompt.trim()} // <-- Disable while processing
+        >
+          {isProcessing ? "Computer is thinking..." : "Send"}
+        </button>
+      </form>
+      <textarea
+        value={response}
+        onChange={(e) => setResponse(e.target.value)}
+        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="Output editor..."
+        rows={4}
+      />
+      <div style={{ maxWidth: "600px", whiteSpace: "pre-line" }}>
+        {response && <MathRenderer text={response} />}
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+
 
 
 
@@ -2623,7 +2798,66 @@ function ExampleForAdminOnly() {
 
 
 
+function ForAdminToUpdateSystemPrompt() {
+  const [systemprompt, setSystemprompt] = useState("");
+  const [token, setToken] = useState('')
+  const [paswword, setPaswword] = useState('')
 
+  useEffect(() => {
+    const savedToken = localStorage.getItem('jwt_token');
+    if (savedToken) setToken(savedToken);
+  }, []);
+
+  const handleLogin = async () => {
+    const res = await fetch(`${API_URL}/authVer2`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: input }),
+    });
+    const data = await res.json();
+    if (data.token) {
+      setToken(data.token);//this token is only stored in variable, so it will be lost whenever reload the page
+      //and other components can't access the token, unless this component outpasses the token
+      setMessage(`Logged in as ${data.user.username}`);
+    } else {
+      setMessage(data.error || "Login failed");
+    }
+  };
+
+  return (
+    <div>
+      <input
+        value={paswword}
+        onChange={(e) => setSystemprompt(e.target.value)}
+        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder="password"
+      />
+      <button
+        onClick={handleLogin}
+        className="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2"
+        disabled={!paswword}
+      >
+        sign in
+      </button>
+      <textarea
+        value={systemprompt}
+        onChange={(e) => setSystemprompt(e.target.value)}
+        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        rows={4}
+        placeholder="input your systemprompt"
+      />
+      {token &&
+        <button
+          onClick={handleLogin}
+          className="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2"
+          disabled={!systemprompt}
+        >
+          send
+        </button>
+      }
+    </div>
+  )
+}
 
 
 
@@ -2640,7 +2874,7 @@ function ExampleForAdminOnly() {
 
 function Login_Add(){
   const [jsoncache, setJsoncache] = useState("");
-  const [atpage, setAtpage] = useState(13);
+  const [atpage, setAtpage] = useState(55);
   const [server, setServer] = useState('')
   const [token1, setToken1] = useState('')
 
@@ -2678,8 +2912,12 @@ function Login_Add(){
 }
 export default function App() {
   return (
-    <>
-      <Login_Add/>
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login_Add />} />
+        <Route path="/admin" element={<FrontendToDatabase />} />
+        <Route path="/gptgeneral" element={<GPTgeneral />} />
+      </Routes>
+    </Router>
   );
 }
