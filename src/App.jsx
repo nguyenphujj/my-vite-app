@@ -2491,9 +2491,9 @@ function GPTgeneral() {
   //type password => click sign in => axios sends password to /auth in backend
   //backend checks password => sends token+user back to frontend
   //frontend receives token+user => stores them in localStorage for later use
-  const handleLogin = async () => { 
+  const handleLogin = async () => {
     try {
-      const response = await axios.post(`${API_URL}/authVer2`, {password,});
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/authVer2`, {password,});
 
       if (response.data.token) {
         setVartoken(response.data.token);//this is vartoken, so it will be lost whenever reload the page
@@ -2506,6 +2506,10 @@ function GPTgeneral() {
     } catch (error) {
     }
   };
+  const handleLogout = async () => {
+    setVartoken('nothing')
+    localStorage.setItem("localtoken", 'nothing')
+  }
 
 
   //this will send prompt to a protected endpoint in backend
@@ -2539,18 +2543,25 @@ function GPTgeneral() {
 
   return (
     <div>
-      <input
-        className="w-[300px] p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button
-        className={`px-4 py-2 text-white rounded-lg hover:bg-blue-700 bg-blue-600 disabled:bg-gray-400`}
-        disabled={!password.trim()}
-        onClick={handleLogin}
+      <div className="space-x-1">
+        <input
+          className="w-[300px] p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button
+          className={`px-4 py-2 text-white rounded-lg hover:bg-blue-700 bg-blue-600 disabled:bg-gray-400`}
+          disabled={!password.trim()}
+          onClick={handleLogin}
         >sign in
-      </button>
+        </button>
+        <button
+          className={`px-4 py-2 text-white rounded-lg hover:bg-blue-700 bg-blue-600 disabled:bg-gray-400`}
+          onClick={handleLogout}
+        >sign out
+        </button>
+      </div>
       <form onSubmit={handleSubmit}>
         <textarea
           className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
