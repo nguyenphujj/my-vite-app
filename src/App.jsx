@@ -2321,23 +2321,26 @@ function DatabaseDisplay() {
 }
 
 
-//this component isn't checked yet, i don't know if it works or not
+//this compo is to display database from postgres
+//if you want this compo to display another database, make sure do following
+//check endpoint url here
+//in backend, make sure the code calls the right tablename
+//in this component, adjust the id, the key name
 function DisplaySystemPromptForDebugging() {
   const [thewholetable, setThewholetable] = useState([]);
   useEffect(() => {
-    fetch("http://localhost:5000/users")
-      .then((res) => res.json())
-      .then((data) => setThewholetable(data))
-      .catch((err) => console.error(err));
+    axios.get(`${import.meta.env.VITE_API_URL}/admin-to-get-db`)
+      .then((response) => { setThewholetable(response.data); })
+      .catch((error) => { console.error(error); });
   }, []);
   return (
     <div>
       <div style={{ whiteSpace: "pre-line" }}>
         {thewholetable
-          .filter(item => item.id === 2)//this will filter or display specific items only
+          .filter(item => item.id === 1)//this will filter or display specific items only
           .map((item, idx) => (
             <div key={item.id ?? idx}>{/* if there is item.id then use it, otherwise simply use idx */}
-              <strong>{item.systemprompt}</strong>
+              <strong>{item.columnprompt}</strong>
             </div>
           ))}
       </div>
@@ -2345,6 +2348,7 @@ function DisplaySystemPromptForDebugging() {
     </div>
   );
 }
+
 //this component isn't checked yet, i don't know if it works or not
 function Inpass_DisplaySystemPrompt_ForDebugging({inpass_thewhole_jsonarray_here}) {
   const [thewholetable, setThewholetable] = useState(inpass_thewhole_jsonarray_here);
@@ -2371,21 +2375,20 @@ function FrontendToDatabase() {
 
   const sendMessage = async () => {
     if (!message.trim()) return;
-
     try {
-      await fetch("http://localhost:5000/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
+      await axios.post(`${import.meta.env.VITE_API_URL}/admin-update-systemprompt`, {
+        message,
+      }, {
+        headers: { "Content-Type": "application/json" }
       });
-      setMessage(""); // clear textarea
+      setMessage("");
     } catch (err) {
       console.error("Error sending message:", err);
     }
   };
 
   return (
-    <div className="flex flex-col items-start gap-2 w-full max-w-md">
+    <div className="flex flex-col items-start gap-2">
       <textarea
         className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         rows={4}
@@ -2396,9 +2399,9 @@ function FrontendToDatabase() {
       <button
         onClick={sendMessage}
         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-      >
-        Send
+      >Send
       </button>
+      <DisplaySystemPromptForDebugging/>
     </div>
   );
 }
@@ -2554,7 +2557,7 @@ function GPTgeneral() {
           className={`px-4 py-2 text-white rounded-lg hover:bg-blue-700 bg-blue-600 disabled:bg-gray-400`}
           disabled={!password.trim()}
           onClick={handleLogin}
-        >sign in
+        >sign inx
         </button>
         <button
           className={`px-4 py-2 text-white rounded-lg hover:bg-blue-700 bg-blue-600 disabled:bg-gray-400`}
@@ -2925,8 +2928,9 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login_Add />} />
-        <Route path="/admin" element={<FrontendToDatabase />} />
+        <Route path="/" element={<GPTgeneral />} />
+        <Route path="/login" element={<Login_Add />} />
+        <Route path="/adminToUpdateDatabase" element={<FrontendToDatabase />} />
         <Route path="/gptgeneral" element={<GPTgeneral />} />
       </Routes>
     </Router>
