@@ -2934,18 +2934,24 @@ function ForAdminToUpdateSystemPrompt() {
 }
 
 
-function TestWebsockets() {
+
+
+//THIS COMPONENT is for WEBSOCKET
+//  to solve the "unable to stream" issue on android
+//this has to go with WEBSOCKET endpoint in backend in order to make everything work
+//to use websocket, you need to npm install ws in backend
+//  push package.json to github
+function PageforWebsockets() {
   const [wsStatus, setWsStatus] = useState('disconnected');
   const [streamText, setStreamText] = useState('');
   const [input, setInput] = useState('Write a short poem about autumn in 3 lines.');
   const wsRef = useRef(null);
 
-  const [forreconnecting, setForreconnecting] = useState(0);
-
   useEffect(() => {
     // open websocket
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const wsUrl = `${import.meta.env.VITE_WSURL}/ws`; // adjust port if backend different
+    // const wsUrl = `${protocol}://${window.location.hostname}:5000`; // adjust port if backend different
+    const wsUrl = `${import.meta.env.VITE_WSURL}/ws`; //modified
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
@@ -2978,7 +2984,6 @@ function TestWebsockets() {
       ws.close();
     };
   }, []);
-  
 
   function startStream() {
     setStreamText('');
@@ -2999,12 +3004,12 @@ function TestWebsockets() {
 
   return (
     <div style={{ padding: 20, fontFamily: 'system-ui, sans-serif' }}>
-      <h1>GPT Streaming via WebSocket</h1>
+      
       <p>Status: <strong>{wsStatus}</strong></p>
 
       <div>
         <textarea
-          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full max-w-[600px] p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           rows={4}
           cols={60}
           value={input}
@@ -3014,7 +3019,7 @@ function TestWebsockets() {
 
       <div style={{ marginTop: 8 }}>
         <button
-          className="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2"
+          className="px-4 py-2 text-white rounded-lg hover:bg-blue-700 bg-blue-600 disabled:bg-gray-400"
           onClick={startStream}
           // Allow sending a new message when connected or after a previous one is done
           disabled={!['connected', 'done'].includes(wsStatus)}
@@ -3023,13 +3028,24 @@ function TestWebsockets() {
         </button>
       </div>
 
-      <h3>Output (streaming):</h3>
-      <pre style={{ whiteSpace: 'pre-wrap' }}>{streamText}</pre>
+      <textarea
+        style={{ marginTop: 8 }}
+        className="w-full max-w-[600px] p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600"
+        /* standard css for textarea */
+        rows={4}
+        cols={60}
+        value={streamText}
+        onChange={(e) => setStreamText(e.target.value)}
+        placeholder="output editor"
+      />
+
+      
+      <div style={{ maxWidth: "600px", whiteSpace: "pre-wrap" }}>
+        {streamText && <MathRenderer text={streamText} />}
+      </div>
     </div>
   );
 }
-
-
 
 
 
@@ -3086,7 +3102,7 @@ export default function App() {
         <Route path="/login" element={<Login_Add />} />
         <Route path="/adminToUpdateDatabase" element={<FrontendToDatabase />} />
         <Route path="/gptgeneral" element={<GPTgeneral />} />
-        <Route path="/testWS" element={<TestWebsockets />} />
+        <Route path="/testWS" element={<PageforWebsockets />} />
       </Routes>
     </Router>
   );
