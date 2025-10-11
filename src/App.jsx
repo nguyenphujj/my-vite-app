@@ -2934,7 +2934,93 @@ function ForAdminToUpdateSystemPrompt() {
 }
 
 
+function TestWebsockets() {
+  const [wsStatus, setWsStatus] = useState('disconnected');
+  const [streamText, setStreamText] = useState('');
+  const [input, setInput] = useState('Write a short poem about autumn in 3 lines.');
+  const wsRef = useRef(null);
 
+  useEffect(() => {
+    // open websocket
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const wsUrl = `${protocol}://${window.location.hostname}:5000`; // adjust port if backend different
+    const ws = new WebSocket(wsUrl);
+    wsRef.current = ws;
+
+    ws.onopen = () => setWsStatus('connected');
+    ws.onclose = () => setWsStatus('closed');
+    ws.onerror = (e) => {
+      console.error('WebSocket error', e);
+      setWsStatus('error');
+    };
+
+    ws.onmessage = (evt) => {
+      try {
+        const msg = JSON.parse(evt.data);
+        if (msg.type === 'delta') {
+          // append token
+          setStreamText((s) => s + msg.content);
+        } else if (msg.type === 'done') {
+          setWsStatus('done');
+        } else if (msg.type === 'error') {
+          setWsStatus('error: ' + (msg.message || 'unknown'));
+        } else if (msg.type === 'pong') {
+          // ignore
+        }
+      } catch (err) {
+        console.error('invalid ws message', err);
+      }
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, []);
+
+  function startStream() {
+    setStreamText('');
+    setWsStatus('streaming');
+
+    const messages = [
+      { role: 'user', content: input }
+    ];
+
+    const payload = {
+      type: 'start',
+      model: 'gpt-4o-mini', // or whichever model you wish
+      messages,
+    };
+
+    wsRef.current.send(JSON.stringify(payload));
+  }
+
+  return (
+    <div style={{ padding: 20, fontFamily: 'system-ui, sans-serif' }}>
+      <h1>GPT Streaming via WebSocket</h1>
+      <p>Status: <strong>{wsStatus}</strong></p>
+
+      <div>
+        <textarea
+          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          rows={4}
+          cols={60}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+      </div>
+
+      <div style={{ marginTop: 8 }}>
+        <button className="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2"
+        onClick={startStream} disabled={wsStatus !== 'connected'}>
+          Start Stream
+        </button>
+      </div>
+
+      <h3>Output (streaming):</h3>
+      <pre style={{ whiteSpace: 'pre-wrap' }}>{streamText}</pre>
+    </div>
+  );
+}
 
 
 
@@ -2993,6 +3079,7 @@ export default function App() {
         <Route path="/login" element={<Login_Add />} />
         <Route path="/adminToUpdateDatabase" element={<FrontendToDatabase />} />
         <Route path="/gptgeneral" element={<GPTgeneral />} />
+        <Route path="/testWS" element={<TestWebsockets />} />
       </Routes>
     </Router>
   );
