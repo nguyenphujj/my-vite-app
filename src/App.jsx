@@ -2945,7 +2945,7 @@ function TestWebsockets() {
   useEffect(() => {
     // open websocket
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const wsUrl = import.meta.env.VITE_WSURL; // adjust port if backend different
+    const wsUrl = `${import.meta.env.VITE_WSURL}/ws`; // adjust port if backend different
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
@@ -2977,10 +2977,8 @@ function TestWebsockets() {
     return () => {
       ws.close();
     };
-  }, [forreconnecting]);
-  useEffect(() => {
-    if (wsStatus == 'done') setForreconnecting(prev => prev + 1)
-  }, [wsStatus]);
+  }, []);
+  
 
   function startStream() {
     setStreamText('');
@@ -3015,9 +3013,13 @@ function TestWebsockets() {
       </div>
 
       <div style={{ marginTop: 8 }}>
-        <button className="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2"
-        onClick={startStream} disabled={wsStatus !== 'connected'}>
-          Start Stream
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded w-full mb-2"
+          onClick={startStream}
+          // Allow sending a new message when connected or after a previous one is done
+          disabled={!['connected', 'done'].includes(wsStatus)}
+        >
+          {wsStatus === 'streaming' ? 'Streaming...' : 'Start Stream'}
         </button>
       </div>
 
