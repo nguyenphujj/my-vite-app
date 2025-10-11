@@ -2940,10 +2940,12 @@ function TestWebsockets() {
   const [input, setInput] = useState('Write a short poem about autumn in 3 lines.');
   const wsRef = useRef(null);
 
+  const [forreconnecting, setForreconnecting] = useState(0);
+
   useEffect(() => {
     // open websocket
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const wsUrl = `${protocol}://${window.location.hostname}:5000`; // adjust port if backend different
+    const wsUrl = import.meta.env.VITE_WSURL; // adjust port if backend different
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
@@ -2975,7 +2977,10 @@ function TestWebsockets() {
     return () => {
       ws.close();
     };
-  }, []);
+  }, [forreconnecting]);
+  useEffect(() => {
+    if (wsStatus == 'done') setForreconnecting(prev => prev + 1)
+  }, [wsStatus]);
 
   function startStream() {
     setStreamText('');
