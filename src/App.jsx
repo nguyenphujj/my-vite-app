@@ -2951,7 +2951,8 @@ function PageforWebsockets() {
     // open websocket
     const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     // const wsUrl = `${protocol}://${window.location.hostname}:5000`; // adjust port if backend different
-    const wsUrl = `${import.meta.env.VITE_WSURL}/ws`; //modified
+    const vartoken = 'this is fake token'
+    const wsUrl = `${import.meta.env.VITE_WSURL}/ws?token=${vartoken}`; //modified
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
@@ -2995,11 +2996,13 @@ function PageforWebsockets() {
 
     const payload = {
       type: 'start',
-      model: 'gpt-4o-mini', // or whichever model you wish
-      messages,
+      model: 'gpt-4o-mini', //model hereeeeeeeeeeeeeee, if you clear model here, frontend will throw error
+        //IMPORTANT, in this websocket code, the model option is decided in frontend, not backend
+      messages: input, //modified, originally messages = itself here
+        //i fixed this one to easier add systemprompt in backend
     };
 
-    wsRef.current.send(JSON.stringify(payload));
+    wsRef.current.send(JSON.stringify(payload));  //THIS IS WHERE request is send to backend
   }
 
   return (
@@ -3017,14 +3020,14 @@ function PageforWebsockets() {
         />
       </div>
 
-      <div style={{ marginTop: 8 }}>
+      <div style={{ marginTop: 0 }}>
         <button
           className="px-4 py-2 text-white rounded-lg hover:bg-blue-700 bg-blue-600 disabled:bg-gray-400"
           onClick={startStream}
           // Allow sending a new message when connected or after a previous one is done
-          disabled={!['connected', 'done'].includes(wsStatus)}
+          disabled={!['connected', 'done'].includes(wsStatus) || !input.trim()}
         >
-          {wsStatus === 'streaming' ? 'Streaming...' : 'Start Stream'}
+          {wsStatus === 'streaming' ? 'computer is thinking...' : 'Send'}
         </button>
       </div>
 
