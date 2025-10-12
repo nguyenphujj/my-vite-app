@@ -2946,45 +2946,70 @@ function PageforWebsockets() {
   const [streamText, setStreamText] = useState('');
   const [input, setInput] = useState('Write a short poem about autumn in 3 lines.');
   const wsRef = useRef(null);
+  const [password, setPassword] = useState("");
+  const [vartoken, setVartoken] = useState("");
+
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/authVer2`, { password, });
+
+      if (response.data.token) {
+        setVartoken(response.data.token);//this is vartoken, so it will be lost whenever reload the page
+        //and other components can't access vartoken, unless this component outpasses vartoken
+        localStorage.setItem("localtoken", response.data.token);//this is localtoken
+        //which will retain after page reload and can be accessed anywhere in frontend code
+        localStorage.setItem("localuser", response.data.user.username);//if you write .user only, it will simply print "object"
+      } else {
+      }
+    } catch (error) {
+    }
+  };
+  const handleLogout = async () => {
+    setVartoken('nothing')
+    localStorage.setItem("localtoken", 'nothing')
+  }
 
   useEffect(() => {
-    // open websocket
-    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    // const wsUrl = `${protocol}://${window.location.hostname}:5000`; // adjust port if backend different
-    const vartoken = 'this is fake token'
-    const wsUrl = `${import.meta.env.VITE_WSURL}/ws?token=${vartoken}`; //modified
-    const ws = new WebSocket(wsUrl);
-    wsRef.current = ws;
+    setVartoken(localStorage.getItem("localtoken"))
+    if (vartoken != 'nothing' && vartoken != '' && vartoken != null) {
+      // open websocket
+      const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      // const wsUrl = `${protocol}://${window.location.hostname}:5000`; // adjust port if backend different
+      const wsUrl = `${import.meta.env.VITE_WSURL}/ws?token=${vartoken || 'usernone'}`; //modified
+      //IMPORTANT, sensitive info can be leaked here, be careful
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
 
-    ws.onopen = () => setWsStatus('connected');
-    ws.onclose = () => setWsStatus('closed');
-    ws.onerror = (e) => {
-      console.error('WebSocket error', e);
-      setWsStatus('error');
-    };
+      ws.onopen = () => setWsStatus('connected');
+      ws.onclose = () => setWsStatus('closed');
+      ws.onerror = (e) => {
+        console.error('WebSocket error', e);
+        setWsStatus('error');
+      };
 
-    ws.onmessage = (evt) => {
-      try {
-        const msg = JSON.parse(evt.data);
-        if (msg.type === 'delta') {
-          // append token
-          setStreamText((s) => s + msg.content);
-        } else if (msg.type === 'done') {
-          setWsStatus('done');
-        } else if (msg.type === 'error') {
-          setWsStatus('error: ' + (msg.message || 'unknown'));
-        } else if (msg.type === 'pong') {
-          // ignore
+      ws.onmessage = (evt) => {
+        try {
+          const msg = JSON.parse(evt.data);
+          if (msg.type === 'delta') {
+            // append token
+            setStreamText((s) => s + msg.content);
+          } else if (msg.type === 'done') {
+            setWsStatus('done');
+          } else if (msg.type === 'error') {
+            setWsStatus('error: ' + (msg.message || 'unknown'));
+          } else if (msg.type === 'pong') {
+            // ignore
+          }
+        } catch (err) {
+          console.error('invalid ws message', err);
         }
-      } catch (err) {
-        console.error('invalid ws message', err);
-      }
-    };
+      };
 
-    return () => {
-      ws.close();
-    };
-  }, []);
+      return () => {
+        ws.close();
+      };
+    }
+  }, [vartoken]);
 
   function startStream() {
     setStreamText('');
@@ -3002,17 +3027,39 @@ function PageforWebsockets() {
         //i fixed this one to easier add systemprompt in backend
     };
 
-    wsRef.current.send(JSON.stringify(payload));  //THIS IS WHERE request is send to backend
+    wsRef.current.send(JSON.stringify(payload));//THIS IS WHERE request is send to backend
   }
 
   return (
     <div style={{ padding: 20, fontFamily: 'system-ui, sans-serif' }}>
       
       <p>Status: <strong>{wsStatus}</strong></p>
+      <div className="space-x-1">
+        <input
+          className="max-w-[600px] p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600"
+          placeholder="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button
+          className="px-4 py-2 text-white rounded-lg hover:bg-blue-700 bg-blue-600 disabled:bg-gray-400"
+          disabled={!password.trim()}
+          onClick={handleLogin}
+        >
+          sign in
+        </button>
+        <button
+          className="px-4 py-2 text-white rounded-lg hover:bg-blue-700 bg-blue-600 disabled:bg-gray-400"
+          onClick={handleLogout}
+        >
+          sign out
+        </button>
+      </div>
+      <br />
 
       <div>
         <textarea
-          className="w-full max-w-[600px] p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full max-w-[600px] p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600"
           rows={4}
           cols={60}
           value={input}
@@ -3027,7 +3074,7 @@ function PageforWebsockets() {
           // Allow sending a new message when connected or after a previous one is done
           disabled={!['connected', 'done'].includes(wsStatus) || !input.trim()}
         >
-          {wsStatus === 'streaming' ? 'computer is thinking...' : 'Send'}
+          {wsStatus === 'streaming' ? 'computer is thinking...' : 'send'}
         </button>
       </div>
 
