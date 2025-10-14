@@ -2946,10 +2946,11 @@ function PageforWebsockets() {
   const [streamText, setStreamText] = useState('');
   const [input, setInput] = useState('Write a short poem about autumn in 3 lines.');
   const wsRef = useRef(null);
+  const [username, setUsername] = useState("");//new1
   const [password, setPassword] = useState("");
   const [vartoken, setVartoken] = useState("");
 
-  const handleLogin = async () => {
+  /* const handleLogin = async () => {
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/authVer2`, { password, });
 
@@ -2963,6 +2964,23 @@ function PageforWebsockets() {
       }
     } catch (error) {
     }
+  }; */
+  
+  //derived from handleLogin of authVer2
+  //this handleLogin is for authVer3, disable other handleLogin if you wanna use this one
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post
+        (`${import.meta.env.VITE_API_URL}/authVer3`, { username, password, });
+
+      if (response.data.token) {
+        setVartoken(response.data.token);
+        localStorage.setItem("localtoken", response.data.token);
+        localStorage.setItem("localuser", response.data.user.username);
+        console.log("login successfully: " + response.data.user.username)
+      } else { }
+    } catch (error) {
+    }
   };
   const handleLogout = async () => {
     setVartoken('nothing')
@@ -2974,7 +2992,6 @@ function PageforWebsockets() {
     if (vartoken != 'nothing' && vartoken != '' && vartoken != null) {
       //it's important to have a top and a bottom running conditions for useeffect to prevent its own self-running
       // because devtools will throw some annoying errors
-      // open websocket
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       // const wsUrl = `${protocol}://${window.location.hostname}:5000`; // adjust port if backend different
       const wsUrl = `${import.meta.env.VITE_WSURL}/ws?token=${vartoken || 'usernone'}`; //modified
@@ -3022,7 +3039,7 @@ function PageforWebsockets() {
     ];
 
     const payload = {
-      type: 'start',////gpt-4o-mini, gpt-5-mini, o3
+      type: 'start',
       model: 'gpt-4o-mini', //model hereeeeeeeeeeeeeee, if you clear model here, frontend will throw error
         //IMPORTANT, in this websocket code, the model option is decided in frontend, not backend
       messages: input, //modified, originally messages = itself here
@@ -3039,13 +3056,19 @@ function PageforWebsockets() {
       <div className="space-x-1">
         <input
           className="max-w-[600px] p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600"
+          placeholder="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          className="max-w-[600px] p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600"
           placeholder="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
         <button
           className="px-4 py-2 text-white rounded-lg hover:bg-blue-700 bg-blue-600 disabled:bg-gray-400"
-          disabled={!password.trim()}
+          disabled={!password.trim() || !username.trim()}
           onClick={handleLogin}
         >
           sign in
