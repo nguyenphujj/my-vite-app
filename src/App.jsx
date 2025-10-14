@@ -2972,6 +2972,8 @@ function PageforWebsockets() {
   useEffect(() => {
     setVartoken(localStorage.getItem("localtoken"))
     if (vartoken != 'nothing' && vartoken != '' && vartoken != null) {
+      //it's important to have a top and a bottom running conditions for useeffect to prevent its own self-running
+      // because devtools will throw some annoying errors
       // open websocket
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       // const wsUrl = `${protocol}://${window.location.hostname}:5000`; // adjust port if backend different
@@ -3020,7 +3022,7 @@ function PageforWebsockets() {
     ];
 
     const payload = {
-      type: 'start',
+      type: 'start',////gpt-4o-mini, gpt-5-mini, o3
       model: 'gpt-4o-mini', //model hereeeeeeeeeeeeeee, if you clear model here, frontend will throw error
         //IMPORTANT, in this websocket code, the model option is decided in frontend, not backend
       messages: input, //modified, originally messages = itself here
