@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import axios from "axios";
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
 
 
@@ -2704,10 +2704,16 @@ function ImageUpload() {
         {loading ? "Analyzing..." : "Upload & Analyze"}
       </button>
 
-      {description && (
+      {true && (
         <div className="mt-4 p-4 border rounded-lg shadow w-full max-w-md">
           <h2 className="font-bold mb-2">Image Description:</h2>
-          <p>{description}</p>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full max-w-[600px] p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600"
+            rows={4}
+            placeholder="image description"
+          />
         </div>
       )}
     </div>
@@ -3125,7 +3131,53 @@ function PageforWebsockets() {
 
 
 
+function ImageInput() {
+  const [imageName, setImageName] = useState("");
+  const navigate = useNavigate();
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (imageName.trim() !== "") {
+      navigate(`/result?name=${encodeURIComponent(imageName)}`);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+      <h1 className="text-2xl font-bold">Enter Image Name</h1>
+      <form onSubmit={handleSubmit} className="flex gap-2">
+        <input
+          type="text"
+          value={imageName}
+          onChange={(e) => setImageName(e.target.value)}
+          placeholder="Type image name..."
+          className="border border-gray-300 rounded-lg px-3 py-2"
+        />
+        <button
+          type="submit"
+          className="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600"
+        >
+          Go
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function ResultPage() {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const imageName = params.get("name");
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <h1 className="text-2xl font-semibold mb-4">Result Page</h1>
+      <div className="border border-gray-300 rounded-lg p-4 text-lg">
+        {imageName ? imageName : "No image name provided."}
+      </div>
+    </div>
+  );
+}
 
 
 
@@ -3178,6 +3230,9 @@ export default function App() {
         <Route path="/adminToUpdateDatabase" element={<FrontendToDatabase />} />
         <Route path="/gptgeneral" element={<GPTgeneral />} />
         <Route path="/testWS" element={<PageforWebsockets />} />
+        <Route path="/ImageUpload" element={<ImageUpload />} />
+        <Route path="/image" element={<ImageInput />} />
+        <Route path="/result" element={<ResultPage />} />
       </Routes>
     </Router>
   );
