@@ -2514,19 +2514,19 @@ function GPTgeneral() {
   }
 
 
-  /* //THIS IS VERSION THE NON-STREAMING VERSION, MAKE SURE IT GOES WITH THE NON-STREAMING VERSION IN BACKEND TOO
+  //THIS IS VERSION THE NON-STREAMING VERSION, MAKE SURE IT GOES WITH THE NON-STREAMING VERSION IN BACKEND TOO
   //AND DISABLE THE STREAMING VERSIONS BOTH IN FRONTEND AND BACKEND
   //this will send prompt to a protected endpoint in backend
   //if you wanna remove the protection, just remove the middleware in the endpoint in backend
   //protected endpoint flow
   // once you signed in, the token either stored as localtoken or vartoken
   // but you should include the token in the backend call
-  const handleSubmit = async (yourevent) => {
+  const handleSubmitNONSTREAMING = async (yourevent) => {
     yourevent.preventDefault(); // this is a critical line for form, without this line the whole page will reload when you submit
     setIsProcessing(true); // this is for button disable during API thinking
 
     try {
-      const response = await axios.post(`${API_URL}/gptgeneralProtectedBackend`, {
+      const response = await axios.post(`${API_URL}/gpt-non-streaming`, {
         prompt,//the prompt will be in req.body.prompt when it arrives in backend
       }, {
         headers: {
@@ -2543,11 +2543,11 @@ function GPTgeneral() {
     } finally {
       setIsProcessing(false); // for button disable
     }
-  }; */
+  };
 
   //THE STREAMING VERSION, MAKE SURE IT GOES WITH THE STREAMING VERSION IN BACKEND TOO
   //AND DISABLE THE NON-STREAMING VERSIONS BOTH IN FRONTEND AND BACKEND
-  const handleSubmit = async (yourevent) => {
+  const handleSubmitSTREAMING = async (yourevent) => {
     yourevent.preventDefault();
     setIsProcessing(true);
     setResponse(""); // clear previous response
@@ -2555,7 +2555,7 @@ function GPTgeneral() {
     try {
       const token = vartoken || localStorage.getItem("localtoken");
 
-      const response = await fetch(`${API_URL}/gptgeneralProtectedBackend`, {
+      const response = await fetch(`${API_URL}/gpt-streaming`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -2625,7 +2625,7 @@ function GPTgeneral() {
         >sign out
         </button>
       </div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmitNONSTREAMING}>
         <textarea
           className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           rows={4}
@@ -3046,7 +3046,7 @@ function PageforWebsockets() {
 
     const payload = {
       type: 'start',
-      model: 'gpt-4o-mini', //model hereeeeeeeeeeeeeee, if you clear model here, frontend will throw error
+      model: 'o3-mini', //model hereeeeeeeeeeeeeee, if you clear model here, frontend will throw error
         //IMPORTANT, in this websocket code, the model option is decided in frontend, not backend
       messages: input, //modified, originally messages = itself here
         //i fixed this one to easier add systemprompt in backend
@@ -3182,6 +3182,47 @@ function ResultPage() {
 
 
 
+
+
+
+function SlowResponse() {
+  const [status, setStatus] = useState("Idle");
+  const [timesimulation, setTimesimulation] = useState("Idle");
+
+  const handleClick = async () => {
+    setStatus("⏳ Calling backend...");
+    try {
+      const response = await fetch("http://localhost:5000/api/start");
+      const text = await response.text();
+      setStatus(text);
+    } catch (error) {
+      setStatus("❌ Error calling backend");
+    }
+  };
+
+  return (
+    <div>
+      <h1>Simulate Slow Backend Chain</h1>
+      <input
+        className="w-full max-w-[600px] p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600"
+        value={timesimulation}
+        onChange={(e) => setTimesimulation(e.target.value)}
+      />
+      <button className="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600" onClick={handleClick}>Start Process</button>
+      <p>Status: {status}</p>
+    </div>
+  );
+}
+
+
+
+
+
+
+
+
+
+
 function Login_Add(){
   const [jsoncache, setJsoncache] = useState("");
   const [atpage, setAtpage] = useState(55);
@@ -3233,6 +3274,7 @@ export default function App() {
         <Route path="/ImageUpload" element={<ImageUpload />} />
         <Route path="/image" element={<ImageInput />} />
         <Route path="/result" element={<ResultPage />} />
+        <Route path="/slow" element={<SlowResponse />} />
       </Routes>
     </Router>
   );
