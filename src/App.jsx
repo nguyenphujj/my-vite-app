@@ -3230,7 +3230,7 @@ function StreamExample() {
 
   useEffect(() => {
     const fetchStream = async () => {
-      const response = await fetch("http://localhost:5000/endpoint1");
+      const response = await fetch("http://localhost:5000/endpoint1new");
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
 
