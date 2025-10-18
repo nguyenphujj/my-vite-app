@@ -3187,12 +3187,18 @@ function ResultPage() {
 
 function SlowResponse() {
   const [status, setStatus] = useState("Idle");
-  const [timesimulation, setTimesimulation] = useState("Idle");
+  const [delaysimulation, setDelaysimulation] = useState(1000);
 
   const handleClick = async () => {
     setStatus("⏳ Calling backend...");
     try {
-      const response = await fetch("http://localhost:5000/api/start");
+      const response = await fetch("http://localhost:5000/api/start", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ delaysimulation }),
+      });
       const text = await response.text();
       setStatus(text);
     } catch (error) {
@@ -3205,8 +3211,8 @@ function SlowResponse() {
       <h1>Simulate Slow Backend Chain</h1>
       <input
         className="w-full max-w-[600px] p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600"
-        value={timesimulation}
-        onChange={(e) => setTimesimulation(e.target.value)}
+        value={delaysimulation}
+        onChange={(e) => setDelaysimulation(e.target.value)}
       />
       <button className="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600" onClick={handleClick}>Start Process</button>
       <p>Status: {status}</p>
@@ -3218,6 +3224,39 @@ function SlowResponse() {
 
 
 
+function StreamExample() {
+  const [data, setData] = useState("");
+  const [xvar, setXvar] = useState(0);
+
+  useEffect(() => {
+    const fetchStream = async () => {
+      const response = await fetch("http://localhost:5000/endpoint1");
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        setData((prev) => prev + chunk);
+      }
+    };
+    if(xvar > 0){
+      fetchStream();
+    }
+  }, [xvar]);
+
+  return (
+    <div style={{ whiteSpace: "pre-wrap" }}>
+      <h2>Streaming Response:</h2>
+      <button
+      className="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600"
+      onClick={() => setXvar(prev => prev + 1)}>activate
+      </button>
+      <div>{data}</div>
+    </div>
+  );
+}
 
 
 
@@ -3275,6 +3314,7 @@ export default function App() {
         <Route path="/image" element={<ImageInput />} />
         <Route path="/result" element={<ResultPage />} />
         <Route path="/slow" element={<SlowResponse />} />
+        <Route path="/stream" element={<StreamExample />} />
       </Routes>
     </Router>
   );
